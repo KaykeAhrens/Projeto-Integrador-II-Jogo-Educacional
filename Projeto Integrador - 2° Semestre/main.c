@@ -101,8 +101,10 @@ int main() {
         al_clear_to_color(al_map_rgb(0, 0, 0));
 
         // Desenha a imagem atual da esteira
-        al_draw_bitmap(esteira[frame], 300, 450, 0);
-
+        al_draw_bitmap(esteira[frame], 350, 530, 0);
+        al_draw_bitmap(esteira[frame], 175, 530, 0);
+        al_draw_bitmap(esteira[frame], 0, 530, 0);
+   
         // Atualiza a tela
         al_flip_display();
 
