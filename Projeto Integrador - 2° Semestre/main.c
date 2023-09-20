@@ -3,6 +3,9 @@
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_image.h>
+#include <allegro5/allegro_ttf.h>
+#include <allegro5/keyboard.h>
+#include <allegro5/allegro_primitives.h>
 
 int main() {
 
@@ -21,7 +24,7 @@ int main() {
 
     // Cria uma janela
     ALLEGRO_DISPLAY* display = al_create_display(800, 600);
-    // Verifica se foi criado corretamente
+    // Verifica se o Display foi criado corretamente
     if (!display) {
         fprintf(stderr, "Falha ao criar janela.\n");
         return -1;
@@ -32,7 +35,7 @@ int main() {
 
     // Inicializa a fila de eventos
     ALLEGRO_EVENT_QUEUE* event_queue = al_create_event_queue();
-    // Verifica se foi criado corretamente
+    // Verifica se a fila foi criada corretamente
     if (!event_queue) {
         fprintf(stderr, "Falha ao criar fila de eventos.\n");
         al_destroy_display(display);
@@ -106,8 +109,12 @@ int main() {
         // Aguarda o atraso para diminuir a velocidade (dividir por mil pois se trata de milissegundos)
         al_rest(delay_ms / 1000.0);
 
-        // Avança para a próxima imagem da esteira - quando frame atinge 23 (o último índice do vetor esteira), ele volta para 0, reiniciando o ciclo e permitindo que as imagens da esteira sejam renderizadas em um loop contínuo
-        frame = (frame + 1) % 24;
+        // Avançando para a próxima imagem da esteira - Explicação:
+        // Subtrai 1 do valor atual de frame, isso significa que estamos indo para a imagem anterior na esteira
+        // Adiciona 24 ao resultado da etapa anterior. Isso é feito para garantir que o valor seja sempre positivo ou zero. 
+        // Se o valor original de frame for 0 e subtrairmos 1, teremos -1, que não é um índice válido para um array. Adicionando 24, tornamos -1 em 23, que é o último índice válido. 
+        // Finalmente, calcula o resto da divisão do resultado da etapa anterior por 24. Isso garante que o valor final de frame esteja dentro do intervalo de 0 a 23. Se o valor for maior que 23, ele voltará para 0, reiniciando o ciclo de imagens da esteira.
+        frame = (frame - 1 + 24) % 24;
     }
 
     for (int i = 0; i < 24; i++) {
