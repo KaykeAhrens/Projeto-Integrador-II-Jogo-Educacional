@@ -73,6 +73,14 @@ int main() {
         }
     }
 
+    // Background
+    ALLEGRO_BITMAP* background = al_load_bitmap("img/bg2.png");
+
+    if (!background) {
+        fprintf(stderr, "Falha ao carregar o bg");
+        return -1;
+    }
+
     // Loop principal do jogo
     bool sair = false;
     while (!sair) {
@@ -100,11 +108,14 @@ int main() {
         // Limpa a tela
         al_clear_to_color(al_map_rgb(0, 0, 0));
 
+        // Mostra o bg
+        al_draw_bitmap(background, 0, 0, 0);
+
         // Desenha a imagem atual da esteira
-        al_draw_bitmap(esteira[frame], 350, 530, 0);
-        al_draw_bitmap(esteira[frame], 175, 530, 0);
-        al_draw_bitmap(esteira[frame], 0, 530, 0);
-   
+        al_draw_bitmap(esteira[frame], 300, 480, 0);
+        al_draw_bitmap(esteira[frame], 125, 480, 0);
+        al_draw_bitmap(esteira[frame], -50, 480, 0);
+
         // Atualiza a tela
         al_flip_display();
 
@@ -122,6 +133,8 @@ int main() {
     for (int i = 0; i < 24; i++) {
         al_destroy_bitmap(esteira[i]);
     }
+    
+    al_destroy_bitmap(background);
 
     al_destroy_timer(timer);
     al_destroy_event_queue(timer_queue);
