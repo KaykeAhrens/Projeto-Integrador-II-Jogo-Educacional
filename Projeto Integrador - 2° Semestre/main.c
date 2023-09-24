@@ -74,10 +74,18 @@ int main() {
     }
 
     // Background
-    ALLEGRO_BITMAP* background = al_load_bitmap("img/bg2.png");
+    ALLEGRO_BITMAP* background = al_load_bitmap("img/background.png");
 
     if (!background) {
         fprintf(stderr, "Falha ao carregar o bg");
+        return -1;
+    }
+
+    //Cientista 
+    ALLEGRO_BITMAP* cientista = al_load_bitmap("img/cientista.png");
+
+    if (!cientista) {
+        fprintf(stderr, "Falha ao carregar o cientista");
         return -1;
     }
 
@@ -111,6 +119,9 @@ int main() {
         // Mostra o bg
         al_draw_bitmap(background, 0, 0, 0);
 
+        // Mostra o cientista
+        al_draw_bitmap(cientista, 250, 280, 0);
+
         // Desenha a imagem atual da esteira
         al_draw_bitmap(esteira[frame], 300, 480, 0);
         al_draw_bitmap(esteira[frame], 125, 480, 0);
@@ -135,6 +146,7 @@ int main() {
     }
     
     al_destroy_bitmap(background);
+    al_destroy_bitmap(cientista);
 
     al_destroy_timer(timer);
     al_destroy_event_queue(timer_queue);
