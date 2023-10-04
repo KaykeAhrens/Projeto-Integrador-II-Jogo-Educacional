@@ -77,17 +77,37 @@ int main() {
     ALLEGRO_BITMAP* background = al_load_bitmap("img/background.png");
 
     if (!background) {
-        fprintf(stderr, "Falha ao carregar o bg");
+        fprintf(stderr, "Falha ao carregar o Background");
         return -1;
     }
 
-    //Cientista 
+    // Cientista 
     ALLEGRO_BITMAP* cientista = al_load_bitmap("img/cientista.png");
 
     if (!cientista) {
-        fprintf(stderr, "Falha ao carregar o cientista");
+        fprintf(stderr, "Falha ao carregar o Cientista");
         return -1;
     }
+
+    // Caldeirao
+    ALLEGRO_BITMAP* caldeirao = al_load_bitmap("img/caldeirao.png");
+
+    if (!caldeirao) {
+        fprintf(stderr, "Falha ao carregar o Caldeirao");
+        return -1;
+    }
+
+    // Carrega a imagem da poção
+    ALLEGRO_BITMAP* pocao = al_load_bitmap("img/potion1.png");
+
+    if (!pocao) {
+        fprintf(stderr, "Falha ao carregar a Pocao");
+        return -1;
+    }
+
+    // Define a posição inicial da poção no lado esquerdo
+    int posicaoPocaoX = -110; // Posição X inicial da poção (fora da tela à esquerda)
+    int posicaoPocaoY = 420; // Posição Y da poção (na mesma altura da esteira)
 
     // Loop principal do jogo
     bool sair = false;
@@ -116,19 +136,34 @@ int main() {
         // Limpa a tela
         al_clear_to_color(al_map_rgb(0, 0, 0));
 
-        // Mostra o bg
+        // Desenha o background
         al_draw_bitmap(background, 0, 0, 0);
 
-        // Mostra o cientista
-        al_draw_bitmap(cientista, 250, 280, 0);
+        // Desenha o cientista
+        al_draw_bitmap(cientista, 250, 270, 0);
+
+        // Desenha o caldeirão
+        al_draw_bitmap(caldeirao, 620, 340, 0);
 
         // Desenha a imagem atual da esteira
-        al_draw_bitmap(esteira[frame], 300, 480, 0);
-        al_draw_bitmap(esteira[frame], 125, 480, 0);
-        al_draw_bitmap(esteira[frame], -50, 480, 0);
+        al_draw_bitmap(esteira[frame], 400, 470, 0);
+        al_draw_bitmap(esteira[frame], 300, 470, 0);
+        al_draw_bitmap(esteira[frame], 125, 470, 0);
+        al_draw_bitmap(esteira[frame], -50, 470, 0);
+
+        // Mostra a poção
+        al_draw_bitmap(pocao, posicaoPocaoX, posicaoPocaoY, 0);
 
         // Atualiza a tela
         al_flip_display();
+
+        // Atualiza a posição da poção (movimento junto com a esteira)
+        posicaoPocaoX += 1; // Movimento para a direita
+
+        // Verifica se a poção saiu da tela e a reposiciona no lado esquerdo
+        if (posicaoPocaoX > 600) {
+            posicaoPocaoX = -110; // Reposiciona a poção fora da tela à esquerda
+        }
 
         // Aguarda o atraso para diminuir a velocidade (dividir por mil pois se trata de milissegundos)
         al_rest(delay_ms / 1000.0);
@@ -144,9 +179,11 @@ int main() {
     for (int i = 0; i < 24; i++) {
         al_destroy_bitmap(esteira[i]);
     }
-    
+
     al_destroy_bitmap(background);
     al_destroy_bitmap(cientista);
+    al_destroy_bitmap(caldeirao);
+    al_destroy_bitmap(pocao);
 
     al_destroy_timer(timer);
     al_destroy_event_queue(timer_queue);
