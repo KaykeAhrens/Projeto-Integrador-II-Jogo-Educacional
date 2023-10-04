@@ -6,10 +6,10 @@
 #include <allegro5/allegro_ttf.h>
 #include <allegro5/keyboard.h>
 #include <allegro5/allegro_primitives.h>
+#include "game.h"
 
 int main() {
-
-    // Inicializa o Allegro
+    // Inicialização do Allegro
     if (!al_init()) {
         fprintf(stderr, "Falha ao inicializar o Allegro.\n");
         return -1;
@@ -31,7 +31,7 @@ int main() {
     }
 
     // Define o título da janela
-    al_set_window_title(display, "Jogo Educacional 2D");
+    al_set_window_title(display, "ChemiXplorer");
 
     // Inicializa a fila de eventos
     ALLEGRO_EVENT_QUEUE* event_queue = al_create_event_queue();
@@ -60,7 +60,7 @@ int main() {
     ALLEGRO_BITMAP* esteira[24];
     for (int i = 0; i < 24; i++) {
         char nomeImg[50];
-        snprintf(nomeImg, sizeof(nomeImg), "img/esteira/%d.png", i + 1); //https://pt.strephonsays.com/printf-and-vs-fprintf-10111
+        snprintf(nomeImg, sizeof(nomeImg), "img/esteira/%d.png", i + 1);
         esteira[i] = al_load_bitmap(nomeImg);
         // Verifica se foi criado corretamente
         if (!esteira[i]) {
@@ -97,17 +97,32 @@ int main() {
         return -1;
     }
 
-    // Carrega a imagem da poção
-    ALLEGRO_BITMAP* pocao = al_load_bitmap("img/potion1.png");
+    // Carregamento das imagens das poções
+    Potion potions[6];
+    // Inicialização das poções
+    for (int i = 0; i < 6; i++) {
+        char nomeImg[50];
+        snprintf(nomeImg, sizeof(nomeImg), "img/potion%d.png", i + 1);
+        potions[i].bitmap = al_load_bitmap(nomeImg);
+        if (!potions[i].bitmap) {
+            fprintf(stderr, "Falha ao carregar a imagem da poção %d.\n", i + 1);
+            for (int j = 0; j < i; j++) {
+                al_destroy_bitmap(potions[j].bitmap);
+            }
+            for (int j = 0; j < 24; j++) {
+                al_destroy_bitmap(esteira[j]);
+            }
+            al_destroy_bitmap(background);
+            al_destroy_bitmap(cientista);
+            al_destroy_bitmap(caldeirao);
+            al_destroy_display(display);
+            return -1;
+        }
 
-    if (!pocao) {
-        fprintf(stderr, "Falha ao carregar a Pocao");
-        return -1;
+        potions[i].x = -150 - i * 150; // Define a posição inicial fora da tela e espaçamento entre as poções
+        potions[i].y = 390; // Posição vertical
+        potions[i].velocidade = 1.0; // Velocidade das poções
     }
-
-    // Define a posição inicial da poção no lado esquerdo
-    int posicaoPocaoX = -110; // Posição X inicial da poção (fora da tela à esquerda)
-    int posicaoPocaoY = 420; // Posição Y da poção (na mesma altura da esteira)
 
     // Loop principal do jogo
     bool sair = false;
@@ -123,15 +138,14 @@ int main() {
         // Colocar aqui a lógica do jogo
 
 
-        // Explicação Básica: a sequência de eventos é a seguinte:
+       // Explicação Básica: a sequência de eventos é a seguinte:
 
-        // 1 - Você limpa a tela.
-        // 2 - Desenha a imagem atual da esteira.
-        // 3 - Chama al_flip_display para tornar a imagem visível na tela.
-        // 4 - Aguarda o atraso(al_rest) para diminuir a velocidade da esteira.
-        // 5 - Avança para a próxima imagem da esteira e repete o processo.
-        // Colocar al_flip_display após a renderização da imagem garante que cada imagem seja exibida na tela antes de esperar pelo atraso, criando assim a animação desejada da esteira.
-
+       // 1 - Você limpa a tela.
+       // 2 - Desenha a imagem atual da esteira.
+       // 3 - Chama al_flip_display para tornar a imagem visível na tela.
+       // 4 - Aguarda o atraso(al_rest) para diminuir a velocidade da esteira.
+       // 5 - Avança para a próxima imagem da esteira e repete o processo.
+       // Colocar al_flip_display após a renderização da imagem garante que cada imagem seja exibida na tela antes de esperar pelo atraso, criando assim a animação desejada da esteira.
 
         // Limpa a tela
         al_clear_to_color(al_map_rgb(0, 0, 0));
@@ -151,29 +165,33 @@ int main() {
         al_draw_bitmap(esteira[frame], 125, 470, 0);
         al_draw_bitmap(esteira[frame], -50, 470, 0);
 
-        // Mostra a poção
-        al_draw_bitmap(pocao, posicaoPocaoX, posicaoPocaoY, 0);
+        // Atualiza a posição das poções e desenha elas
+        for (int i = 0; i < 6; i++) {
+            potions[i].x += potions[i].velocidade;
+            // Se a poção sair da tela à direita, ela volta à esquerda
+            if (potions[i].x > 600) {
+                potions[i].x = -280;
+            }
+            al_draw_bitmap(potions[i].bitmap, potions[i].x, potions[i].y, 0);
+        }
 
         // Atualiza a tela
         al_flip_display();
 
-        // Atualiza a posição da poção (movimento junto com a esteira)
-        posicaoPocaoX += 1; // Movimento para a direita
-
-        // Verifica se a poção saiu da tela e a reposiciona no lado esquerdo
-        if (posicaoPocaoX > 600) {
-            posicaoPocaoX = -110; // Reposiciona a poção fora da tela à esquerda
-        }
-
         // Aguarda o atraso para diminuir a velocidade (dividir por mil pois se trata de milissegundos)
         al_rest(delay_ms / 1000.0);
-
+        
         // Avançando para a próxima imagem da esteira - Explicação:
         // Subtrai 1 do valor atual de frame, isso significa que estamos indo para a imagem anterior na esteira
         // Adiciona 24 ao resultado da etapa anterior. Isso é feito para garantir que o valor seja sempre positivo ou zero. 
         // Se o valor original de frame for 0 e subtrairmos 1, teremos -1, que não é um índice válido para um array. Adicionando 24, tornamos -1 em 23, que é o último índice válido. 
         // Finalmente, calcula o resto da divisão do resultado da etapa anterior por 24. Isso garante que o valor final de frame esteja dentro do intervalo de 0 a 23. Se o valor for maior que 23, ele voltará para 0, reiniciando o ciclo de imagens da esteira.
         frame = (frame - 1 + 24) % 24;
+    }
+
+    // Destruindo recursos
+    for (int i = 0; i < 6; i++) {
+        al_destroy_bitmap(potions[i].bitmap);
     }
 
     for (int i = 0; i < 24; i++) {
@@ -183,7 +201,6 @@ int main() {
     al_destroy_bitmap(background);
     al_destroy_bitmap(cientista);
     al_destroy_bitmap(caldeirao);
-    al_destroy_bitmap(pocao);
 
     al_destroy_timer(timer);
     al_destroy_event_queue(timer_queue);
