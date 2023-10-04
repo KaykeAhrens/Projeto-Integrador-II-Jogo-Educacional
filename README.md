@@ -12,4 +12,6 @@ tópicos de disciplinas do ensino médio brasileiro.
 
 • Grupos devem ser compostos de 3 integrantes (4, como exceção).
 
-![One Sheet Paper](./img/OneSheet.PNG)
+<div align="center">
+<img src="https://github.com/KaykeAhrens/Projeto-Integrador-II-Jogo-Educacional/assets/87396308/5ee143a6-157e-490c-87ef-99cee8139e8f" />
+</div>
