@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_image.h>
@@ -97,17 +98,23 @@ int main() {
         return -1;
     }
 
+    int lastPotion = -1; // Valor que não representa nenhuma poção
+    int consecutivePotion = 0; // Contador para poções consecutivas
+    srand(time(NULL));
+    
     // Carregamento das imagens das poções
+    ALLEGRO_BITMAP* bitmapPotions[6];
     Potion potions[6];
     // Inicialização das poções
     for (int i = 0; i < 6; i++) {
         char nomeImg[50];
         snprintf(nomeImg, sizeof(nomeImg), "img/potion%d.png", i + 1);
-        potions[i].bitmap = al_load_bitmap(nomeImg);
+        bitmapPotions[i] = al_load_bitmap(nomeImg);
+        potions[i].bitmap = bitmapPotions[i];
         if (!potions[i].bitmap) {
             fprintf(stderr, "Falha ao carregar a imagem da poção %d.\n", i + 1);
             for (int j = 0; j < i; j++) {
-                al_destroy_bitmap(potions[j].bitmap);
+                al_destroy_bitmap(bitmapPotions[i]);
             }
             for (int j = 0; j < 24; j++) {
                 al_destroy_bitmap(esteira[j]);
@@ -168,9 +175,29 @@ int main() {
         // Atualiza a posição das poções e desenha elas
         for (int i = 0; i < 6; i++) {
             potions[i].x += potions[i].velocidade;
-            // Se a poção sair da tela à direita, ela volta à esquerda
+            // Se a poção sair da tela à direita, reposicione todas em ordem aleatória
             if (potions[i].x > 600) {
-                potions[i].x = -280;
+                int randomPotion = rand() % 6;
+
+                // Verifica se a nova poção é igual à anterior
+                if (randomPotion == lastPotion) {
+                    consecutivePotion++;
+                }
+                else {
+                    consecutivePotion = 0; // Reinicia o contador se for diferente
+                }
+                
+                // Se tiver 2 poções consecutivas iguais, escolhe outra aleatória
+                if (consecutivePotion == 2) {
+                    do {
+                        randomPotion = rand() % 6;
+                    } while (randomPotion == lastPotion);
+                    consecutivePotion = 0;
+                }
+
+                potions[i].bitmap = bitmapPotions[randomPotion];
+                potions[i].x = -290;
+                lastPotion = randomPotion; // Atualiza a última poção usada
             }
             al_draw_bitmap(potions[i].bitmap, potions[i].x, potions[i].y, 0);
         }
@@ -180,7 +207,7 @@ int main() {
 
         // Aguarda o atraso para diminuir a velocidade (dividir por mil pois se trata de milissegundos)
         al_rest(delay_ms / 1000.0);
-        
+
         // Avançando para a próxima imagem da esteira - Explicação:
         // Subtrai 1 do valor atual de frame, isso significa que estamos indo para a imagem anterior na esteira
         // Adiciona 24 ao resultado da etapa anterior. Isso é feito para garantir que o valor seja sempre positivo ou zero. 
@@ -191,7 +218,8 @@ int main() {
 
     // Destruindo recursos
     for (int i = 0; i < 6; i++) {
-        al_destroy_bitmap(potions[i].bitmap);
+        al_destroy_bitmap(bitmapPotions[i]);
+        potions[i].bitmap = NULL;
     }
 
     for (int i = 0; i < 24; i++) {
