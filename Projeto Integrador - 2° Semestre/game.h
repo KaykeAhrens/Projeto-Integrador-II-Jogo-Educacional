@@ -4,7 +4,7 @@
 // Struct para representar uma poção
 typedef struct {
     ALLEGRO_BITMAP* bitmap; // Imagem da poção
-    int x; // Posição X da poção
-    int y; // Posição Y da poção
-    int velocidade; // Velocidade da poção
+    float x; // Posição X da poção
+    float y; // Posição Y da poção
+    float velocidade; // Velocidade da poção
 } Potion;

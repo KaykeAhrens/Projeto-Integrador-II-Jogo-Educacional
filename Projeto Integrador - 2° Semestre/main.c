@@ -52,10 +52,13 @@ int main() {
     // Registra os eventos que deseja tratar
     al_register_event_source(event_queue, al_get_display_event_source(display));
     al_register_event_source(timer_queue, al_get_timer_event_source(timer));
+    al_register_event_source(event_queue, al_get_mouse_event_source());
     al_start_timer(timer);
 
     int frame = 0; // Variável para controlar o quadro atual da esteira
-    int delay_ms = 10; // Atraso de 10 milissegundos entre as renderizações
+    int delay_ms = 1; // Atraso de 1 milissegundo entre as renderizações de todo o jogo
+    int frame_counter = 0; // Contador de quadros
+    int esteira_delay_frames = 5; // Quantidade de quadros antes de atualizar a esteira (controle de velocidade)
 
     // Carrega as 24 imagens da esteira em um array de bitmaps
     ALLEGRO_BITMAP* esteira[24];
@@ -101,7 +104,7 @@ int main() {
     int lastPotion = -1; // Valor que não representa nenhuma poção
     int consecutivePotion = 0; // Contador para poções consecutivas
     srand(time(NULL));
-    
+
     // Carregamento das imagens das poções
     ALLEGRO_BITMAP* bitmapPotions[6];
     Potion potions[6];
@@ -128,8 +131,13 @@ int main() {
 
         potions[i].x = -150 - i * 150; // Define a posição inicial fora da tela e espaçamento entre as poções
         potions[i].y = 390; // Posição vertical
-        potions[i].velocidade = 1.0; // Velocidade das poções
+        potions[i].velocidade = 0.25; // Velocidade das poções
     }
+
+    // Variáveis para o drag and drop
+    bool isDragging = false;  // Indica se uma poção está sendo arrastada
+    int draggingPotionIndex = -1;  // Índice da poção sendo arrastada
+    int offsetX, offsetY;  // Deslocamento do mouse em relação ao canto superior esquerdo da poção arrastada
 
     // Loop principal do jogo
     bool sair = false;
@@ -140,19 +148,46 @@ int main() {
             if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
                 sair = true;
             }
+            else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {  // Botão do mouse pressionado
+                if (event.mouse.button == 1) {  // Botão esquerdo do mouse pressionado
+                    int mouseX = event.mouse.x;
+                    int mouseY = event.mouse.y;
+
+                    // Verifica se o mouse está sobre alguma poção (começando da última para a primeira)
+                    for (int i = 5; i >= 0; i--) {
+                        if (mouseX >= potions[i].x && mouseX <= (potions[i].x + al_get_bitmap_width(potions[i].bitmap)) &&
+                            mouseY >= potions[i].y && mouseY <= (potions[i].y + al_get_bitmap_height(potions[i].bitmap))) {
+                            isDragging = true;
+                            draggingPotionIndex = i;
+                            offsetX = mouseX - potions[i].x;
+                            offsetY = mouseY - potions[i].y;
+                            break;
+                        }
+                    }
+                }
+            }
+            else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP) {  // Botão do mouse solto
+                if (event.mouse.button == 1 && isDragging) {  // Botão esquerdo do mouse solto
+                    isDragging = false;
+
+                    // Verifica se a poção foi solta dentro do caldeirão
+                    if (event.mouse.x >= 620 && event.mouse.x <= (620 + al_get_bitmap_width(caldeirao)) &&
+                        event.mouse.y >= 340 && event.mouse.y <= (340 + al_get_bitmap_height(caldeirao))) {
+                        // A poção foi solta dentro do caldeirão, colocar a lógica do que acontecerá aqui
+                    }
+                    else {
+                        // A poção foi solta fora do caldeirão, colocar a lógica do que acontecerá aqui
+                        // Esse código faz desaparecer porém, ocorre sobreposição (corrigir)
+                        // potions[draggingPotionIndex].x = -150 - draggingPotionIndex * 150;
+                        // potions[draggingPotionIndex].y = 390;
+                    }
+                }
+            }
+            else if (event.type == ALLEGRO_EVENT_MOUSE_AXES && isDragging) {  // Mouse movido enquanto arrasta
+                potions[draggingPotionIndex].x = event.mouse.x - offsetX;
+                potions[draggingPotionIndex].y = event.mouse.y - offsetY;
+            }
         }
-
-        // Colocar aqui a lógica do jogo
-
-
-       // Explicação Básica: a sequência de eventos é a seguinte:
-
-       // 1 - Você limpa a tela.
-       // 2 - Desenha a imagem atual da esteira.
-       // 3 - Chama al_flip_display para tornar a imagem visível na tela.
-       // 4 - Aguarda o atraso(al_rest) para diminuir a velocidade da esteira.
-       // 5 - Avança para a próxima imagem da esteira e repete o processo.
-       // Colocar al_flip_display após a renderização da imagem garante que cada imagem seja exibida na tela antes de esperar pelo atraso, criando assim a animação desejada da esteira.
 
         // Limpa a tela
         al_clear_to_color(al_map_rgb(0, 0, 0));
@@ -176,7 +211,7 @@ int main() {
         for (int i = 0; i < 6; i++) {
             potions[i].x += potions[i].velocidade;
             // Se a poção sair da tela à direita, reposicione todas em ordem aleatória
-            if (potions[i].x > 600) {
+            if (potions[i].x > 610 && potions[i].y >= 320 && potions[i].y <= 440) {
                 int randomPotion = rand() % 6;
 
                 // Verifica se a nova poção é igual à anterior
@@ -186,7 +221,7 @@ int main() {
                 else {
                     consecutivePotion = 0; // Reinicia o contador se for diferente
                 }
-                
+
                 // Se tiver 2 poções consecutivas iguais, escolhe outra aleatória
                 if (consecutivePotion == 2) {
                     do {
@@ -208,12 +243,12 @@ int main() {
         // Aguarda o atraso para diminuir a velocidade (dividir por mil pois se trata de milissegundos)
         al_rest(delay_ms / 1000.0);
 
-        // Avançando para a próxima imagem da esteira - Explicação:
-        // Subtrai 1 do valor atual de frame, isso significa que estamos indo para a imagem anterior na esteira
-        // Adiciona 24 ao resultado da etapa anterior. Isso é feito para garantir que o valor seja sempre positivo ou zero. 
-        // Se o valor original de frame for 0 e subtrairmos 1, teremos -1, que não é um índice válido para um array. Adicionando 24, tornamos -1 em 23, que é o último índice válido. 
-        // Finalmente, calcula o resto da divisão do resultado da etapa anterior por 24. Isso garante que o valor final de frame esteja dentro do intervalo de 0 a 23. Se o valor for maior que 23, ele voltará para 0, reiniciando o ciclo de imagens da esteira.
-        frame = (frame - 1 + 24) % 24;
+        // Avançando para a próxima imagem da esteira
+        frame_counter++;
+        if (frame_counter >= esteira_delay_frames) {
+            frame = (frame - 1 + 24) % 24;
+            frame_counter = 0; // Reinicia o contador de quadros
+        }
     }
 
     // Destruindo recursos
