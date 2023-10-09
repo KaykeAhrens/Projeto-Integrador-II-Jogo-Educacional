@@ -135,9 +135,9 @@ int main() {
     }
 
     // Variáveis para o drag and drop
-    bool isDragging = false;  // Indica se uma poção está sendo arrastada
-    int draggingPotionIndex = -1;  // Índice da poção sendo arrastada
-    int offsetX, offsetY;  // Deslocamento do mouse em relação ao canto superior esquerdo da poção arrastada
+    bool arrastando = false;  // Indica se uma poção está sendo arrastada
+    int indice_PocaoArrastada = -1;  // Índice da poção sendo arrastada
+    int deslocamentoX, deslocamentoY;  // Deslocamento do mouse em relação ao canto superior esquerdo da poção arrastada
 
     // Loop principal do jogo
     bool sair = false;
@@ -157,18 +157,18 @@ int main() {
                     for (int i = 5; i >= 0; i--) {
                         if (mouseX >= potions[i].x && mouseX <= (potions[i].x + al_get_bitmap_width(potions[i].bitmap)) &&
                             mouseY >= potions[i].y && mouseY <= (potions[i].y + al_get_bitmap_height(potions[i].bitmap))) {
-                            isDragging = true;
-                            draggingPotionIndex = i;
-                            offsetX = mouseX - potions[i].x;
-                            offsetY = mouseY - potions[i].y;
+                            arrastando = true;
+                            indice_PocaoArrastada = i;
+                            deslocamentoX = mouseX - potions[i].x;
+                            deslocamentoY = mouseY - potions[i].y;
                             break;
                         }
                     }
                 }
             }
             else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP) {  // Botão do mouse solto
-                if (event.mouse.button == 1 && isDragging) {  // Botão esquerdo do mouse solto
-                    isDragging = false;
+                if (event.mouse.button == 1 && arrastando) {  // Botão esquerdo do mouse solto
+                    arrastando = false;
 
                     // Verifica se a poção foi solta dentro do caldeirão
                     if (event.mouse.x >= 620 && event.mouse.x <= (620 + al_get_bitmap_width(caldeirao)) &&
@@ -177,15 +177,12 @@ int main() {
                     }
                     else {
                         // A poção foi solta fora do caldeirão, colocar a lógica do que acontecerá aqui
-                        // Esse código faz desaparecer porém, ocorre sobreposição (corrigir)
-                        // potions[draggingPotionIndex].x = -150 - draggingPotionIndex * 150;
-                        // potions[draggingPotionIndex].y = 390;
                     }
                 }
             }
-            else if (event.type == ALLEGRO_EVENT_MOUSE_AXES && isDragging) {  // Mouse movido enquanto arrasta
-                potions[draggingPotionIndex].x = event.mouse.x - offsetX;
-                potions[draggingPotionIndex].y = event.mouse.y - offsetY;
+            else if (event.type == ALLEGRO_EVENT_MOUSE_AXES && arrastando) {  // Mouse movido enquanto arrasta
+                potions[indice_PocaoArrastada].x = event.mouse.x - deslocamentoX;
+                potions[indice_PocaoArrastada].y = event.mouse.y - deslocamentoY;
             }
         }
 
