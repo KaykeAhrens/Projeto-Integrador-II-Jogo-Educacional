@@ -101,6 +101,16 @@ int main() {
         return -1;
     }
 
+    // Cursor do Mouse
+    ALLEGRO_MOUSE_CURSOR *customCursor = al_create_mouse_cursor(al_load_bitmap("img/custom_cursor.png"), 0, 0);
+    if (!customCursor) {
+        fprintf(stderr, "Falha ao criar o cursor personalizado.\n");
+        return -1;
+    }
+
+    // Configura o cursor personalizado
+    al_set_mouse_cursor(display, customCursor);
+
     int lastPotion = -1; // Valor que não representa nenhuma poção
     int consecutivePotion = 0; // Contador para poções consecutivas
     srand(time(NULL));
@@ -264,7 +274,7 @@ int main() {
 
     al_destroy_timer(timer);
     al_destroy_event_queue(timer_queue);
-
+    al_destroy_mouse_cursor(customCursor);
     al_destroy_event_queue(event_queue);
     al_destroy_display(display);
 
