@@ -101,15 +101,19 @@ int main() {
         return -1;
     }
 
-    // Cursor do Mouse
-    ALLEGRO_MOUSE_CURSOR *customCursor = al_create_mouse_cursor(al_load_bitmap("img/custom_cursor.png"), 0, 0);
+    // Cursor do Mouse (Seta)
+    ALLEGRO_MOUSE_CURSOR *customCursor = al_create_mouse_cursor(al_load_bitmap("img/simpleCursor.png"), 0, 0);
     if (!customCursor) {
         fprintf(stderr, "Falha ao criar o cursor personalizado.\n");
         return -1;
     }
 
-    // Configura o cursor personalizado
-    al_set_mouse_cursor(display, customCursor);
+    // Cursor do Mouse (Mão)
+    ALLEGRO_MOUSE_CURSOR* handCustomCursor = al_create_mouse_cursor(al_load_bitmap("img/handCursor.png"), 0, 0);
+    if (!customCursor) {
+        fprintf(stderr, "Falha ao criar o cursor personalizado.\n");
+        return -1;
+    }
 
     int lastPotion = -1; // Valor que não representa nenhuma poção
     int consecutivePotion = 0; // Contador para poções consecutivas
@@ -159,6 +163,7 @@ int main() {
                 sair = true;
             }
             else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {  // Botão do mouse pressionado
+                al_set_mouse_cursor(display, handCustomCursor); // Configura o cursor da mãozinha c botão press
                 if (event.mouse.button == 1) {  // Botão esquerdo do mouse pressionado
                     int mouseX = event.mouse.x;
                     int mouseY = event.mouse.y;
@@ -177,6 +182,7 @@ int main() {
                 }
             }
             else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP) {  // Botão do mouse solto
+                al_set_mouse_cursor(display, customCursor);  // Configura o cursor com o botão do mouse solto
                 if (event.mouse.button == 1 && arrastando) {  // Botão esquerdo do mouse solto
                     arrastando = false;
 
