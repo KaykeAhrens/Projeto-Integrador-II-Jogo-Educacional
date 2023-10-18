@@ -102,7 +102,7 @@ int main() {
     }
 
     // Cursor do Mouse (Seta)
-    ALLEGRO_MOUSE_CURSOR *customCursor = al_create_mouse_cursor(al_load_bitmap("img/simpleCursor.png"), 0, 0);
+    ALLEGRO_MOUSE_CURSOR* customCursor = al_create_mouse_cursor(al_load_bitmap("img/simpleCursor.png"), 0, 0);
     if (!customCursor) {
         fprintf(stderr, "Falha ao criar o cursor personalizado.\n");
         return -1;
@@ -152,7 +152,8 @@ int main() {
     bool arrastando = false;  // Indica se uma poção está sendo arrastada
     int indice_PocaoArrastada = -1;  // Índice da poção sendo arrastada
     int deslocamentoX, deslocamentoY;  // Deslocamento do mouse em relação ao canto superior esquerdo da poção arrastada
-
+    int lastPosition = 5; // Índice da última poção que será instanciada
+    
     // Loop principal do jogo
     bool sair = false;
     while (!sair) {
@@ -163,7 +164,7 @@ int main() {
                 sair = true;
             }
             else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {  // Botão do mouse pressionado
-                al_set_mouse_cursor(display, handCustomCursor); // Configura o cursor da mãozinha c botão press
+                al_set_mouse_cursor(display, handCustomCursor); // Configura o cursor da mãozinha com o botão pressionado
                 if (event.mouse.button == 1) {  // Botão esquerdo do mouse pressionado
                     int mouseX = event.mouse.x;
                     int mouseY = event.mouse.y;
@@ -193,12 +194,15 @@ int main() {
                     }
                     else {
                         // A poção foi solta fora do caldeirão, colocar a lógica do que acontecerá aqui
+                        potions[indice_PocaoArrastada].y = -1000;
+                        potions[indice_PocaoArrastada].velocidade = 0.25;
                     }
                 }
             }
             else if (event.type == ALLEGRO_EVENT_MOUSE_AXES && arrastando) {  // Mouse movido enquanto arrasta
                 potions[indice_PocaoArrastada].x = event.mouse.x - deslocamentoX;
                 potions[indice_PocaoArrastada].y = event.mouse.y - deslocamentoY;
+                potions[indice_PocaoArrastada].velocidade = 0;
             }
         }
 
@@ -224,7 +228,7 @@ int main() {
         for (int i = 0; i < 6; i++) {
             potions[i].x += potions[i].velocidade;
             // Se a poção sair da tela à direita, reposicione todas em ordem aleatória
-            if (potions[i].x > 610 && potions[i].y >= 320 && potions[i].y <= 440) {
+            if (potions[i].x > 610) {
                 int randomPotion = rand() % 6;
 
                 // Verifica se a nova poção é igual à anterior
@@ -244,9 +248,15 @@ int main() {
                 }
 
                 potions[i].bitmap = bitmapPotions[randomPotion];
-                potions[i].x = -290;
-                lastPotion = randomPotion; // Atualiza a última poção usada
+                
+                // Define o espaçamento de acordo com a posição da poção arrastada anteriormente
+                potions[i].x = potions[lastPosition].x - 150;
+                lastPosition = i; 
+
+                potions[i].y = 390;
+                lastPotion = randomPotion; 
             }
+
             al_draw_bitmap(potions[i].bitmap, potions[i].x, potions[i].y, 0);
         }
 
