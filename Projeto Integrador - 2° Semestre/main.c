@@ -101,6 +101,9 @@ int main() {
         return -1;
     }
 
+    // Varal
+    ALLEGRO_BITMAP* varal = al_load_bitmap("img/varal.png");
+
     // Cursor do Mouse (Seta)
     ALLEGRO_MOUSE_CURSOR* customCursor = al_create_mouse_cursor(al_load_bitmap("img/simpleCursor.png"), 0, 0);
     if (!customCursor) {
@@ -167,7 +170,7 @@ int main() {
         }
 
         orders[i].x = 180 - i * 80;
-        orders[i].y = 20;
+        orders[i].y = 18;
     }
 
     // Variáveis para o drag and drop
@@ -240,6 +243,9 @@ int main() {
         // Desenha o caldeirão
         al_draw_bitmap(caldeirao, 620, 340, 0);
 
+        // Desenha o varal 
+        al_draw_bitmap(varal, -13, 20, 0);
+
         // Desenha a imagem atual da esteira
         al_draw_bitmap(esteira[frame], 400, 470, 0);
         al_draw_bitmap(esteira[frame], 300, 470, 0);
@@ -250,7 +256,7 @@ int main() {
         for (int i = 0; i < 6; i++) {
             potions[i].x += potions[i].velocidade;
             // Se a poção sair da tela à direita, reposicione todas em ordem aleatória
-            if (potions[i].x > 610) {
+            if (potions[i].x > 550) {
                 int randomPotion = rand() % 6;
 
                 // Verifica se a nova poção é igual à anterior
@@ -328,6 +334,7 @@ int main() {
     al_destroy_bitmap(background);
     al_destroy_bitmap(cientista);
     al_destroy_bitmap(caldeirao);
+    al_destroy_bitmap(varal);
 
     al_destroy_timer(timer);
     al_destroy_event_queue(timer_queue);
