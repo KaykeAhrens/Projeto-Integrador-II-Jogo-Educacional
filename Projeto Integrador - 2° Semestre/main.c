@@ -148,6 +148,28 @@ int main() {
         potions[i].velocidade = 0.25; // Velocidade das poções
     }
 
+    // Carregamento dos Pedidos
+    ALLEGRO_BITMAP* bitmapOrders[5];
+    Potion orders[5];
+
+    // Inicializando
+    for (int i = 0; i < 5; i++) {
+        char nomeImg[50];
+        snprintf(nomeImg, sizeof(nomeImg), "img/pedido%d.png", i + 1);
+        bitmapOrders[i] = al_load_bitmap(nomeImg);
+        orders[i].bitmap = bitmapOrders[i];
+        if (!orders[i].bitmap) {
+            fprintf(stderr, "Falha ao carregar o pedido %d\n", i + 1);
+            for (int j = 0; j < i; j++) {
+                al_destroy_bitmap(bitmapOrders[i]);
+            }
+            return -1;
+        }
+
+        orders[i].x = 180 - i * 80;
+        orders[i].y = 20;
+    }
+
     // Variáveis para o drag and drop
     bool arrastando = false;  // Indica se uma poção está sendo arrastada
     int indice_PocaoArrastada = -1;  // Índice da poção sendo arrastada
@@ -260,6 +282,20 @@ int main() {
             al_draw_bitmap(potions[i].bitmap, potions[i].x, potions[i].y, 0);
         }
 
+        // Posiciona os pedidos na tela
+        for (int i = 0; i < 3; i++) {
+            al_draw_bitmap(bitmapOrders[i], orders[i].x, orders[i].y, 0);
+            if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
+                //int mouseX = event.mouse.x;
+                //int mouseY = event.mouse.y;
+                //for (int i = 5; i >= 0; i--) {
+                    //if (mouseX >= orders[i].x && mouseX <= (orders[i].x + al_get_bitmap_width(orders[i].bitmap))) {
+                        int rndOrder = rand() % 5;
+                    //}
+                //}
+            }
+        }
+
         // Atualiza a tela
         al_flip_display();
 
@@ -278,6 +314,11 @@ int main() {
     for (int i = 0; i < 6; i++) {
         al_destroy_bitmap(bitmapPotions[i]);
         potions[i].bitmap = NULL;
+    }
+
+    for (int i = 0; i < 5; i++) {
+        al_destroy_bitmap(bitmapOrders[i]);
+        orders[i].bitmap = NULL;
     }
 
     for (int i = 0; i < 24; i++) {
