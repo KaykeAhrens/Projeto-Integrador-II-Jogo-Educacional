@@ -104,14 +104,14 @@ int main() {
     // Cursor do Mouse (Seta)
     ALLEGRO_MOUSE_CURSOR* customCursor = al_create_mouse_cursor(al_load_bitmap("img/simpleCursor.png"), 0, 0);
     if (!customCursor) {
-        fprintf(stderr, "Falha ao criar o cursor personalizado.\n");
+        fprintf(stderr, "Falha ao criar o cursor da seta personalizada.\n");
         return -1;
     }
 
     // Cursor do Mouse (Mão)
     ALLEGRO_MOUSE_CURSOR* handCustomCursor = al_create_mouse_cursor(al_load_bitmap("img/handCursor.png"), 0, 0);
-    if (!customCursor) {
-        fprintf(stderr, "Falha ao criar o cursor personalizado.\n");
+    if (!handCustomCursor) {
+        fprintf(stderr, "Falha ao criar o cursor da mão personalizado.\n");
         return -1;
     }
 
@@ -153,7 +153,7 @@ int main() {
     int indice_PocaoArrastada = -1;  // Índice da poção sendo arrastada
     int deslocamentoX, deslocamentoY;  // Deslocamento do mouse em relação ao canto superior esquerdo da poção arrastada
     int lastPosition = 5; // Índice da última poção que será instanciada
-    
+
     // Loop principal do jogo
     bool sair = false;
     while (!sair) {
@@ -248,13 +248,13 @@ int main() {
                 }
 
                 potions[i].bitmap = bitmapPotions[randomPotion];
-                
+
                 // Define o espaçamento de acordo com a posição da poção arrastada anteriormente
                 potions[i].x = potions[lastPosition].x - 150;
-                lastPosition = i; 
+                lastPosition = i;
 
                 potions[i].y = 390;
-                lastPotion = randomPotion; 
+                lastPotion = randomPotion;
             }
 
             al_draw_bitmap(potions[i].bitmap, potions[i].x, potions[i].y, 0);
