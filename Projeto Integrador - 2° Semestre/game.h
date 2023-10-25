@@ -7,4 +7,5 @@ typedef struct {
     float x; // Posição X da poção
     float y; // Posição Y da poção
     float velocidade; // Velocidade da poção
+    bool taArrastando; // Flag para verificar se uma poção é arrastada
 } Potion;
