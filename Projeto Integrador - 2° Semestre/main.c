@@ -7,6 +7,8 @@
 #include <allegro5/allegro_ttf.h>
 #include <allegro5/keyboard.h>
 #include <allegro5/allegro_primitives.h>
+#include <allegro5/allegro_audio.h>
+#include <allegro5/allegro_acodec.h>
 #include "game.h"
 
 int main() {
@@ -18,9 +20,11 @@ int main() {
 
     al_init_font_addon();
     al_init_ttf_addon();
+    al_init_acodec_addon();
     al_init_image_addon();
     al_install_keyboard();
     al_install_mouse();
+    al_install_audio();
     al_init_primitives_addon();
 
     // Cria uma janela
@@ -44,7 +48,15 @@ int main() {
     }
 
     // Cria um timer
-    ALLEGRO_TIMER* timer = al_create_timer(1.0 / 60);
+    ALLEGRO_TIMER* timer = al_create_timer(1.0);
+
+    // Cria uma fonte
+    ALLEGRO_FONT* fonte = al_load_ttf_font("fontes/Exo-Regular.ttf", 20, 0);
+
+    // Cria as músicas
+    ALLEGRO_SAMPLE* msc_timer = al_load_sample("msc/mscTemporizador.mp3");
+    ALLEGRO_SAMPLE* msc_game = al_load_sample("msc/mscJogo.mp3");
+    al_reserve_samples(2);
 
     // Cria uma fila de eventos para o timer
     ALLEGRO_EVENT_QUEUE* timer_queue = al_create_event_queue();
@@ -53,6 +65,10 @@ int main() {
     al_register_event_source(event_queue, al_get_display_event_source(display));
     al_register_event_source(timer_queue, al_get_timer_event_source(timer));
     al_register_event_source(event_queue, al_get_mouse_event_source());
+
+    // Temporizador
+    float tempoAntigo = al_get_time();
+    int segundos = 59;
     al_start_timer(timer);
 
     int frame = 0; // Variável para controlar o quadro atual da esteira
@@ -103,6 +119,9 @@ int main() {
 
     // Varal
     ALLEGRO_BITMAP* varal = al_load_bitmap("img/varal.png");
+
+    // Cronômetro
+    ALLEGRO_BITMAP* cronometro = al_load_bitmap("img/cronometro.png");
 
     // Cursor do Mouse (Seta)
     ALLEGRO_MOUSE_CURSOR* customCursor = al_create_mouse_cursor(al_load_bitmap("img/simpleCursor.png"), 0, 0);
@@ -156,7 +175,7 @@ int main() {
     ALLEGRO_BITMAP* bitmapOrders[5];
     Potion orders[5];
 
-    // Inicializando
+    // Inicializando os Pedidos
     for (int i = 0; i < 5; i++) {
         char nomeImg[50];
         snprintf(nomeImg, sizeof(nomeImg), "img/pedido%d.png", i + 1);
@@ -165,13 +184,22 @@ int main() {
         if (!orders[i].bitmap) {
             printf("Falha ao carregar o pedido %d\n", i + 1);
             for (int j = 0; j < i; j++) {
-                al_destroy_bitmap(bitmapOrders[i]);
+                al_destroy_bitmap(bitmapOrders[j]);
             }
             return -1;
         }
 
-        orders[i].x = 180 - i * 80;
+        orders[i].x = 300 - i * 70;
         orders[i].y = 18;
+    }
+
+    int ordem_indices[5] = { 0, 1, 2, 3, 4 };
+
+    for (int i = 4; i > 0; i--) {
+        int j = rand() % (i + 1);
+        int temp = ordem_indices[i];
+        ordem_indices[i] = ordem_indices[j];
+        ordem_indices[j] = temp;
     }
 
     // Variáveis para o drag and drop
@@ -180,10 +208,17 @@ int main() {
     int deslocamentoX, deslocamentoY;  // Deslocamento do mouse em relação ao canto superior esquerdo da poção arrastada
     int lastPosition = 5; // Índice da última poção que será instanciada
     bool taArrastando = false;
-    
+
     // Loop principal do jogo
     bool sair = false;
+
     while (!sair) {
+        float tempoAtual = al_get_time();
+        if (tempoAtual - tempoAntigo >= 1) {
+            tempoAntigo = tempoAtual;
+            segundos--;
+        }
+
         ALLEGRO_EVENT event;
         if (al_get_next_event(event_queue, &event)) {
             // Verifica se o usuário fechou a janela no X
@@ -211,6 +246,7 @@ int main() {
                 }
             }
             else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP) {  // Botão do mouse solto
+                al_play_sample(msc_game, 0.5, 0.0, 1.0, ALLEGRO_PLAYMODE_LOOP, 0);
                 al_set_mouse_cursor(display, customCursor);  // Configura o cursor com o botão do mouse solto
                 if (event.mouse.button == 1 && arrastando) {  // Botão esquerdo do mouse solto
                     arrastando = false;
@@ -292,10 +328,21 @@ int main() {
             al_draw_bitmap(potions[i].bitmap, potions[i].x, potions[i].y, 0);
         }
 
-        // Posiciona os pedidos na tela
-        for (int i = 0; i < 3; i++) {
-            al_draw_bitmap(bitmapOrders[i], orders[i].x, orders[i].y, 0);
+        // Posiciona os pedidos na tela de acordo com a ordem embaralhada
+        for (int i = 0; i < 5; i++) {
+            al_draw_bitmap(bitmapOrders[ordem_indices[i]], orders[i].x, orders[i].y, 0);
         }
+
+        // Temporizador
+        al_draw_bitmap(cronometro, 480, 35, 0);
+        al_draw_text(fonte, al_map_rgb(255, 255, 255), 600, 42, ALLEGRO_ALIGN_CENTRE, "Tempo Restante - ");
+        al_draw_textf(fonte, al_map_rgb(255, 255, 255), 710, 42, ALLEGRO_ALIGN_CENTRE, "00:%d", segundos);
+        if (segundos <= 10) {
+            al_stop_sample(msc_game);
+            al_play_sample(msc_timer, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, 0);
+            al_draw_textf(fonte, al_map_rgb(255, 0, 0), 710, 42, ALLEGRO_ALIGN_CENTRE, "00:%d", segundos);
+        }
+        if (segundos == 0) break;
 
         // Atualiza a tela
         al_flip_display();
@@ -330,8 +377,12 @@ int main() {
     al_destroy_bitmap(cientista);
     al_destroy_bitmap(caldeirao);
     al_destroy_bitmap(varal);
+    al_destroy_bitmap(cronometro);
 
     al_destroy_timer(timer);
+    al_destroy_font(fonte);
+    al_destroy_sample(msc_timer);
+    al_destroy_sample(msc_game);
     al_destroy_event_queue(timer_queue);
     al_destroy_mouse_cursor(handCustomCursor);
     al_destroy_mouse_cursor(customCursor);
