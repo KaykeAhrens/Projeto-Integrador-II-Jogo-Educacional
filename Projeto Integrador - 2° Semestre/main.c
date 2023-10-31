@@ -211,7 +211,7 @@ int main() {
 
     // Loop principal do jogo
     bool sair = false;
-
+    al_play_sample(msc_game, 0.5, 0.0, 1.0, ALLEGRO_PLAYMODE_LOOP, 0);
     while (!sair) {
         float tempoAtual = al_get_time();
         if (tempoAtual - tempoAntigo >= 1) {
@@ -246,7 +246,7 @@ int main() {
                 }
             }
             else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP) {  // Botão do mouse solto
-                al_play_sample(msc_game, 0.5, 0.0, 1.0, ALLEGRO_PLAYMODE_LOOP, 0);
+                
                 al_set_mouse_cursor(display, customCursor);  // Configura o cursor com o botão do mouse solto
                 if (event.mouse.button == 1 && arrastando) {  // Botão esquerdo do mouse solto
                     arrastando = false;
