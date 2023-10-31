@@ -336,11 +336,15 @@ int main() {
         // Temporizador
         al_draw_bitmap(cronometro, 480, 35, 0);
         al_draw_text(fonte, al_map_rgb(255, 255, 255), 600, 42, ALLEGRO_ALIGN_CENTRE, "Tempo Restante - ");
-        al_draw_textf(fonte, al_map_rgb(255, 255, 255), 710, 42, ALLEGRO_ALIGN_CENTRE, "00:%d", segundos);
+        // Formata os minutos e segundos com dois dígitos
+        int minutos = segundos / 60;
+        int segundos_restantes = segundos % 60;
+        al_draw_textf(fonte, al_map_rgb(255, 255, 255), 710, 42, ALLEGRO_ALIGN_CENTRE, "%02d:%02d", minutos, segundos_restantes);
+
         if (segundos <= 10) {
             al_stop_sample(msc_game);
             al_play_sample(msc_timer, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, 0);
-            al_draw_textf(fonte, al_map_rgb(255, 0, 0), 710, 42, ALLEGRO_ALIGN_CENTRE, "00:%d", segundos);
+            al_draw_textf(fonte, al_map_rgb(255, 0, 0), 710, 42, ALLEGRO_ALIGN_CENTRE, "%02d:%02d", minutos, segundos_restantes);
         }
         if (segundos == 0) break;
 
