@@ -10,6 +10,16 @@
 #include <allegro5/allegro_audio.h>
 #include <allegro5/allegro_acodec.h>
 #include "game.h"
+#include <string.h>
+
+int pegarIndexPocao(char* nomeImagem) {
+    char* token = NULL;
+    char* imageSplit1 = strtok_s(nomeImagem, ".", &token);
+    char* imageSplit2 = strtok_s(imageSplit1, "n", &token);
+
+    int indexPotion = atoi(token);
+    return indexPotion;
+}
 
 int main() {
     // Inicialização do Allegro
@@ -68,7 +78,7 @@ int main() {
 
     // Temporizador
     float tempoAntigo = al_get_time();
-    int segundos = 59;
+    int segundos = 60;
     al_start_timer(timer);
 
     int frame = 0; // Variável para controlar o quadro atual da esteira
@@ -142,18 +152,23 @@ int main() {
     srand(time(NULL));
 
     // Carregamento das imagens das poções
-    ALLEGRO_BITMAP* bitmapPotions[6];
+    PotionProperties bitmapPotions[6];
     Potion potions[6];
     // Inicialização das poções
     for (int i = 0; i < 6; i++) {
         char nomeImg[50];
         snprintf(nomeImg, sizeof(nomeImg), "img/potion%d.png", i + 1);
-        bitmapPotions[i] = al_load_bitmap(nomeImg);
-        potions[i].bitmap = bitmapPotions[i];
+        bitmapPotions[i].bitmap = al_load_bitmap(nomeImg);
+        // Pega o index da poção em relação ao seu endereço de imagem
+        // Subtrai 1 do resultado pois o array começa em 0 e atribui ao id do bitmap da poção
+        bitmapPotions[i].id = pegarIndexPocao(&nomeImg) - 1;
+        potions[i].bitmap = bitmapPotions[i].bitmap;
+        potions[i].id = bitmapPotions[i].id;
+
         if (!potions[i].bitmap) {
             printf("Falha ao carregar a imagem da poção %d.\n", i + 1);
             for (int j = 0; j < i; j++) {
-                al_destroy_bitmap(bitmapPotions[i]);
+                al_destroy_bitmap(bitmapPotions[i].bitmap);
             }
             for (int j = 0; j < 24; j++) {
                 al_destroy_bitmap(esteira[j]);
@@ -202,12 +217,17 @@ int main() {
         ordem_indices[j] = temp;
     }
 
+    // Mapeamento entre índices de poções e tipos correspondentes
+    enum TipoPocao tipoPorIndice[6] = { NA, CL, OH, AL, MG, H };
+
     // Variáveis para o drag and drop
     bool arrastando = false;  // Indica se uma poção está sendo arrastada
     int indice_PocaoArrastada = -1;  // Índice da poção sendo arrastada
     int deslocamentoX, deslocamentoY;  // Deslocamento do mouse em relação ao canto superior esquerdo da poção arrastada
     int lastPosition = 5; // Índice da última poção que será instanciada
     bool taArrastando = false;
+
+    int pontuacao = 0; // Defina a pontuação inicial
 
     // Loop principal do jogo
     bool sair = false;
@@ -246,7 +266,7 @@ int main() {
                 }
             }
             else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP) {  // Botão do mouse solto
-                
+
                 al_set_mouse_cursor(display, customCursor);  // Configura o cursor com o botão do mouse solto
                 if (event.mouse.button == 1 && arrastando) {  // Botão esquerdo do mouse solto
                     arrastando = false;
@@ -257,6 +277,18 @@ int main() {
                     if (event.mouse.x >= 620 && event.mouse.x <= (620 + al_get_bitmap_width(caldeirao)) &&
                         event.mouse.y >= 340 && event.mouse.y <= (340 + al_get_bitmap_height(caldeirao))) {
                         // A poção foi solta dentro do caldeirão, colocar a lógica do que acontecerá aqui
+                        int tipoPocaoArrastada = tipoPorIndice[potions[indice_PocaoArrastada].id];
+                        int tipoPedidoAtual = tipoPorIndice[ordem_indices[0]];
+
+                        printf("Tipo da poção arrastada: %d\n", tipoPocaoArrastada);
+                        printf("Tipo do pedido atual: %d\n", tipoPedidoAtual);
+
+                        if (tipoPocaoArrastada == tipoPedidoAtual) {
+                            pontuacao += 10;
+                        }
+                        else {
+                            pontuacao -= 10;
+                        }
                     }
                     else {
                         // A poção foi solta fora do caldeirão, colocar a lógica do que acontecerá aqui
@@ -315,7 +347,9 @@ int main() {
                     consecutivePotion = 0;
                 }
 
-                potions[i].bitmap = bitmapPotions[randomPotion];
+                //relacionando aquele numero randomico com a poção e o id dela
+                potions[i].bitmap = bitmapPotions[randomPotion].bitmap;
+                potions[i].id = bitmapPotions[randomPotion].id;
 
                 // Define o espaçamento de acordo com a posição da poção arrastada anteriormente
                 potions[i].x = potions[lastPosition].x - 150;
@@ -348,6 +382,8 @@ int main() {
         }
         if (segundos == 0) break;
 
+        al_draw_textf(fonte, al_map_rgb(255, 255, 255), 605, 82, ALLEGRO_ALIGN_RIGHT, "Pontos: %d", pontuacao);
+
         // Atualiza a tela
         al_flip_display();
 
@@ -364,7 +400,7 @@ int main() {
 
     // Destruindo recursos
     for (int i = 0; i < 6; i++) {
-        al_destroy_bitmap(bitmapPotions[i]);
+        al_destroy_bitmap(bitmapPotions[i].bitmap);
         potions[i].bitmap = NULL;
     }
 
