@@ -145,6 +145,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="jogo.c" />
     <ClCompile Include="main.c" />
   </ItemGroup>
   <ItemGroup>

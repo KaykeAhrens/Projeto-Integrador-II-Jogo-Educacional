@@ -1,11 +1,26 @@
-#pragma once
+ï»¿#pragma once
 #include <allegro5/allegro.h>
 
-// Struct para representar uma poção
+enum TipoPocao {
+    NA,
+    CL,
+    OH,
+    AL,
+    MG,
+    H
+};
+
+// Struct para representar uma poï¿½ï¿½o
 typedef struct {
-    ALLEGRO_BITMAP* bitmap; // Imagem da poção
-    float x; // Posição X da poção
-    float y; // Posição Y da poção
-    float velocidade; // Velocidade da poção
-    bool taArrastando; // Flag para verificar se uma poção é arrastada
+    ALLEGRO_BITMAP* bitmap; // Imagem da poï¿½ï¿½o
+    float x; // Posiï¿½ï¿½o X da poï¿½ï¿½o
+    float y; // Posiï¿½ï¿½o Y da poï¿½ï¿½o
+    float velocidade; // Velocidade da poï¿½ï¿½o
+    bool taArrastando; // Flag para verificar se uma poï¿½ï¿½o ï¿½ arrastada
+    enum TipoPocao id;
 } Potion;
+
+typedef struct {
+    ALLEGRO_BITMAP* bitmap;
+    enum TipoPocao id;
+} PotionProperties;
