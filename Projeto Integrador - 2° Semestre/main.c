@@ -44,11 +44,10 @@ int main() {
             if (event.keyboard.keycode == ALLEGRO_KEY_ENTER) {
                 al_destroy_display(display);
                 jogo = gamePlay();
-                //sair = true;
             }
         }
         else if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
-            break;
+            sair = true;
         }
     }
 

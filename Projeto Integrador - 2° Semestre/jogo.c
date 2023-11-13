@@ -375,12 +375,12 @@ int gamePlay() {
         int segundos_restantes = segundos % 60;
         al_draw_textf(fonte, al_map_rgb(255, 255, 255), 710, 42, ALLEGRO_ALIGN_CENTRE, "%02d:%02d", minutos, segundos_restantes);
 
-        if (segundos <= 10) {
+        if (segundos <= 50) {
             al_stop_sample(msc_game);
             al_play_sample(msc_timer, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, 0);
             al_draw_textf(fonte, al_map_rgb(255, 0, 0), 710, 42, ALLEGRO_ALIGN_CENTRE, "%02d:%02d", minutos, segundos_restantes);
         }
-        if (segundos == 0) {
+        if (segundos == 40) {
             al_destroy_display(display);
             al_destroy_sample(msc_game);
             al_destroy_sample(msc_timer);
