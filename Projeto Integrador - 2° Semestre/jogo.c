@@ -22,10 +22,18 @@ int pegarIndexPocao(char* nomeImagem) {
 }
 
 int gamePlay() {
-    // Inicializa��o do Allegro
+    // Inicializa  o do Allegro
     if (!al_init()) {
         printf("Falha ao inicializar o Allegro.\n");
         return -1;
+    }
+
+    // Criação do display
+    ALLEGRO_DISPLAY* display = al_create_display(800, 600);
+    if (!display) {
+        printf("Falha ao criar janela.\n");
+        return -1;
+
     }
 
     al_init_font_addon();
@@ -37,15 +45,13 @@ int gamePlay() {
     al_install_audio();
     al_init_primitives_addon();
 
-    // Cria uma janela
-    ALLEGRO_DISPLAY* display = al_create_display(800, 600);
     // Verifica se o Display foi criado corretamente
     if (!display) {
         printf("Falha ao criar janela.\n");
         return -1;
     }
 
-    // Define o t�tulo da janela
+    // Define o t tulo da janela
     al_set_window_title(display, "ChemiXplorer");
 
     // Inicializa a fila de eventos
@@ -63,7 +69,7 @@ int gamePlay() {
     // Cria uma fonte
     ALLEGRO_FONT* fonte = al_load_ttf_font("fontes/Exo-Regular.ttf", 20, 0);
 
-    // Cria as m�sicas
+    // Cria as m sicas
     ALLEGRO_SAMPLE* msc_timer = al_load_sample("msc/mscTemporizador.mp3");
     ALLEGRO_SAMPLE* msc_game = al_load_sample("msc/mscJogo.mp3");
     al_reserve_samples(2);
@@ -81,8 +87,8 @@ int gamePlay() {
     int segundos = 60;
     al_start_timer(timer);
 
-    int frame = 0; // Vari�vel para controlar o quadro atual da esteira
-    int delay_ms = 1; // Atraso de 1 milissegundo entre as renderiza��es de todo o jogo
+    int frame = 0; // Vari vel para controlar o quadro atual da esteira
+    int delay_ms = 1; // Atraso de 1 milissegundo entre as renderiza  es de todo o jogo
     int frame_counter = 0; // Contador de quadros
     int esteira_delay_frames = 5; // Quantidade de quadros antes de atualizar a esteira (controle de velocidade)
 
@@ -130,7 +136,7 @@ int gamePlay() {
     // Varal
     ALLEGRO_BITMAP* varal = al_load_bitmap("img/varal.png");
 
-    // Cron�metro
+    // Cron metro
     ALLEGRO_BITMAP* cronometro = al_load_bitmap("img/cronometro.png");
 
     // Cursor do Mouse (Seta)
@@ -140,33 +146,33 @@ int gamePlay() {
         return -1;
     }
 
-    // Cursor do Mouse (M�o)
+    // Cursor do Mouse (M o)
     ALLEGRO_MOUSE_CURSOR* handCustomCursor = al_create_mouse_cursor(al_load_bitmap("img/handCursor.png"), 0, 0);
     if (!handCustomCursor) {
-        printf("Falha ao criar o cursor da m�o personalizado.\n");
+        printf("Falha ao criar o cursor da m o personalizado.\n");
         return -1;
     }
 
-    int lastPotion = -1; // Valor que n�o representa nenhuma po��o
-    int consecutivePotion = 0; // Contador para po��es consecutivas
+    int lastPotion = -1; // Valor que n o representa nenhuma po  o
+    int consecutivePotion = 0; // Contador para po  es consecutivas
     srand(time(NULL));
 
-    // Carregamento das imagens das po��es
+    // Carregamento das imagens das po  es
     PotionProperties bitmapPotions[6];
     Potion potions[6];
-    // Inicializa��o das po��es
+    // Inicializa  o das po  es
     for (int i = 0; i < 6; i++) {
         char nomeImg[50];
         snprintf(nomeImg, sizeof(nomeImg), "img/potion%d.png", i + 1);
         bitmapPotions[i].bitmap = al_load_bitmap(nomeImg);
-        // Pega o index da po��o em rela��o ao seu endere�o de imagem
-        // Subtrai 1 do resultado pois o array come�a em 0 e atribui ao id do bitmap da po��o
+        // Pega o index da po  o em rela  o ao seu endere o de imagem
+        // Subtrai 1 do resultado pois o array come a em 0 e atribui ao id do bitmap da po  o
         bitmapPotions[i].id = pegarIndexPocao(&nomeImg) - 1;
         potions[i].bitmap = bitmapPotions[i].bitmap;
         potions[i].id = bitmapPotions[i].id;
 
         if (!potions[i].bitmap) {
-            printf("Falha ao carregar a imagem da po��o %d.\n", i + 1);
+            printf("Falha ao carregar a imagem da po  o %d.\n", i + 1);
             for (int j = 0; j < i; j++) {
                 al_destroy_bitmap(bitmapPotions[i].bitmap);
             }
@@ -180,9 +186,9 @@ int gamePlay() {
             return -1;
         }
 
-        potions[i].x = -150 - i * 150; // Define a posi��o inicial fora da tela e espa�amento entre as po��es
-        potions[i].y = 390; // Posi��o vertical
-        potions[i].velocidade = 0.25; // Velocidade das po��es
+        potions[i].x = -150 - i * 150; // Define a posi  o inicial fora da tela e espa amento entre as po  es
+        potions[i].y = 390; // Posi  o vertical
+        potions[i].velocidade = 0.25; // Velocidade das po  es
         potions[i].taArrastando = false;
     }
 
@@ -217,17 +223,17 @@ int gamePlay() {
         ordem_indices[j] = temp;
     }
 
-    // Mapeamento entre �ndices de po��es e tipos correspondentes
+    // Mapeamento entre  ndices de po  es e tipos correspondentes
     enum TipoPocao tipoPorIndice[6] = { NA, CL, OH, AL, MG, H };
 
-    // Vari�veis para o drag and drop
-    bool arrastando = false;  // Indica se uma po��o est� sendo arrastada
-    int indice_PocaoArrastada = -1;  // �ndice da po��o sendo arrastada
-    int deslocamentoX, deslocamentoY;  // Deslocamento do mouse em rela��o ao canto superior esquerdo da po��o arrastada
-    int lastPosition = 5; // �ndice da �ltima po��o que ser� instanciada
+    // Vari veis para o drag and drop
+    bool arrastando = false;  // Indica se uma po  o est  sendo arrastada
+    int indice_PocaoArrastada = -1;  //  ndice da po  o sendo arrastada
+    int deslocamentoX, deslocamentoY;  // Deslocamento do mouse em rela  o ao canto superior esquerdo da po  o arrastada
+    int lastPosition = 5; //  ndice da  ltima po  o que ser  instanciada
     bool taArrastando = false;
 
-    int pontuacao = 0; // Defina a pontua��o inicial
+    int pontuacao = 0; // Defina a pontua  o inicial
 
     // Loop principal do jogo
     bool sair = false;
@@ -241,17 +247,17 @@ int gamePlay() {
 
         ALLEGRO_EVENT event;
         if (al_get_next_event(event_queue, &event)) {
-            // Verifica se o usu�rio fechou a janela no X
+            // Verifica se o usu rio fechou a janela no X
             if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
                 sair = true;
             }
-            else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {  // Bot�o do mouse pressionado
-                al_set_mouse_cursor(display, handCustomCursor); // Configura o cursor da m�ozinha com o bot�o pressionado
-                if (event.mouse.button == 1) {  // Bot�o esquerdo do mouse pressionado
+            else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {  // Bot o do mouse pressionado
+                al_set_mouse_cursor(display, handCustomCursor); // Configura o cursor da m ozinha com o bot o pressionado
+                if (event.mouse.button == 1) {  // Bot o esquerdo do mouse pressionado
                     int mouseX = event.mouse.x;
                     int mouseY = event.mouse.y;
 
-                    // Verifica se o mouse est� sobre alguma po��o (come�ando da �ltima para a primeira)
+                    // Verifica se o mouse est  sobre alguma po  o (come ando da  ltima para a primeira)
                     for (int i = 5; i >= 0; i--) {
                         if (mouseX >= potions[i].x && mouseX <= (potions[i].x + al_get_bitmap_width(potions[i].bitmap)) &&
                             mouseY >= potions[i].y && mouseY <= (potions[i].y + al_get_bitmap_height(potions[i].bitmap))) {
@@ -265,22 +271,22 @@ int gamePlay() {
                     }
                 }
             }
-            else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP) {  // Bot�o do mouse solto
+            else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP) {  // Bot o do mouse solto
 
-                al_set_mouse_cursor(display, customCursor);  // Configura o cursor com o bot�o do mouse solto
-                if (event.mouse.button == 1 && arrastando) {  // Bot�o esquerdo do mouse solto
+                al_set_mouse_cursor(display, customCursor);  // Configura o cursor com o bot o do mouse solto
+                if (event.mouse.button == 1 && arrastando) {  // Bot o esquerdo do mouse solto
                     arrastando = false;
 
                     potions[indice_PocaoArrastada].taArrastando = false;
                     potions[indice_PocaoArrastada].velocidade = 0.25;
-                    // Verifica se a po��o foi solta dentro do caldeir�o
+                    // Verifica se a po  o foi solta dentro do caldeir o
                     if (event.mouse.x >= 620 && event.mouse.x <= (620 + al_get_bitmap_width(caldeirao)) &&
                         event.mouse.y >= 340 && event.mouse.y <= (340 + al_get_bitmap_height(caldeirao))) {
-                        // A po��o foi solta dentro do caldeir�o, colocar a l�gica do que acontecer� aqui
+                        // A po  o foi solta dentro do caldeir o, colocar a l gica do que acontecer  aqui
                         int tipoPocaoArrastada = tipoPorIndice[potions[indice_PocaoArrastada].id];
                         int tipoPedidoAtual = tipoPorIndice[ordem_indices[0]];
 
-                        printf("Tipo da po��o arrastada: %d\n", tipoPocaoArrastada);
+                        printf("Tipo da po  o arrastada: %d\n", tipoPocaoArrastada);
                         printf("Tipo do pedido atual: %d\n", tipoPedidoAtual);
 
                         if (tipoPocaoArrastada == tipoPedidoAtual) {
@@ -291,7 +297,7 @@ int gamePlay() {
                         }
                     }
                     else {
-                        // A po��o foi solta fora do caldeir�o, colocar a l�gica do que acontecer� aqui
+                        // A po  o foi solta fora do caldeir o, colocar a l gica do que acontecer  aqui
                         potions[indice_PocaoArrastada].y = -1000;
                     }
                 }
@@ -312,7 +318,7 @@ int gamePlay() {
         // Desenha o cientista
         al_draw_bitmap(cientista, 250, 270, 0);
 
-        // Desenha o caldeir�o
+        // Desenha o caldeir o
         al_draw_bitmap(caldeirao, 620, 340, 0);
 
         // Desenha o varal 
@@ -324,14 +330,14 @@ int gamePlay() {
         al_draw_bitmap(esteira[frame], 125, 470, 0);
         al_draw_bitmap(esteira[frame], -50, 470, 0);
 
-        // Atualiza a posi��o das po��es e desenha elas
+        // Atualiza a posi  o das po  es e desenha elas
         for (int i = 0; i < 6; i++) {
             potions[i].x += potions[i].velocidade;
-            // Se a po��o sair da tela � direita, reposicione todas em ordem aleat�ria
+            // Se a po  o sair da tela   direita, reposicione todas em ordem aleat ria
             if (potions[i].x > 550 && !potions[i].taArrastando) {
                 int randomPotion = rand() % 6;
 
-                // Verifica se a nova po��o � igual � anterior
+                // Verifica se a nova po  o   igual   anterior
                 if (randomPotion == lastPotion) {
                     consecutivePotion++;
                 }
@@ -339,7 +345,7 @@ int gamePlay() {
                     consecutivePotion = 0; // Reinicia o contador se for diferente
                 }
 
-                // Se tiver 2 po��es consecutivas iguais, escolhe outra aleat�ria
+                // Se tiver 2 po  es consecutivas iguais, escolhe outra aleat ria
                 if (consecutivePotion == 2) {
                     do {
                         randomPotion = rand() % 6;
@@ -347,11 +353,11 @@ int gamePlay() {
                     consecutivePotion = 0;
                 }
 
-                //relacionando aquele numero randomico com a po��o e o id dela
+                //relacionando aquele numero randomico com a po  o e o id dela
                 potions[i].bitmap = bitmapPotions[randomPotion].bitmap;
                 potions[i].id = bitmapPotions[randomPotion].id;
 
-                // Define o espa�amento de acordo com a posi��o da po��o arrastada anteriormente
+                // Define o espa amento de acordo com a posi  o da po  o arrastada anteriormente
                 potions[i].x = potions[lastPosition].x - 150;
                 lastPosition = i;
 
@@ -370,7 +376,7 @@ int gamePlay() {
         // Temporizador
         al_draw_bitmap(cronometro, 480, 35, 0);
         al_draw_text(fonte, al_map_rgb(255, 255, 255), 600, 42, ALLEGRO_ALIGN_CENTRE, "Tempo Restante - ");
-        // Formata os minutos e segundos com dois d�gitos
+        // Formata os minutos e segundos com dois d gitos
         int minutos = segundos / 60;
         int segundos_restantes = segundos % 60;
         al_draw_textf(fonte, al_map_rgb(255, 255, 255), 710, 42, ALLEGRO_ALIGN_CENTRE, "%02d:%02d", minutos, segundos_restantes);
@@ -395,7 +401,7 @@ int gamePlay() {
         // Aguarda o atraso para diminuir a velocidade (dividir por mil pois se trata de milissegundos)
         al_rest(delay_ms / 1000.0);
 
-        // Avan�ando para a pr�xima imagem da esteira
+        // Avan ando para a pr xima imagem da esteira
         frame_counter++;
         if (frame_counter >= esteira_delay_frames) {
             frame = (frame - 1 + 24) % 24;
