@@ -8,13 +8,7 @@
 #include <allegro5/allegro_ttf.h>
 #include <allegro5/keyboard.h>
 #include <allegro5/allegro_primitives.h>
-
-
-// Estrutura para representar um jogador
-typedef struct {
-	char name[50];
-	int score;
-} Player;
+#include "game.h"
 
 // Tela de BemVindo
 void drawBemvindo(ALLEGRO_FONT* fonte, ALLEGRO_BITMAP* logo, ALLEGRO_BITMAP* bemvindo) {
@@ -32,29 +26,14 @@ void drawNome(const char* playerName, ALLEGRO_FONT* fonte2) {
 	al_draw_text(fonte2, al_map_rgb(0, 0, 0), 400, 440, ALLEGRO_ALIGN_CENTRE, playerName);
 }
 
-// Desenha opções de voltar ou sair
+// Desenha opÃ§Ãµes de voltar ou sair
 void displayOptions(ALLEGRO_FONT* fonte2) {
 	al_draw_text(fonte2, al_map_rgb(255, 255, 255), 800 / 2, 510, ALLEGRO_ALIGN_CENTRE, "Pressione V para Voltar ou S para Sair.");
 	al_flip_display();
 }
 
-// Função de ordenação (Insertion Sort) para ordenar o vetor de jogadores em ordem decrescente de pontuação
-void insertionSort(Player arr[], int n) {
-	int i, j;
-	Player key;
+// FunÃ§Ã£o para desenhar um losango com bordas arredondadas e o nÃºmero da colocaÃ§Ã£o
 
-	for (i = 1; i < n; i++) {
-		key = arr[i];
-		j = i - 1;
-
-		while (j >= 0 && arr[j].score < key.score) {
-			arr[j + 1] = arr[j];
-			j = j - 1;
-		}
-		arr[j + 1] = key;
-	}
-}
-// Função para desenhar um losango com bordas arredondadas e o número da colocação
 void drawLosango(int x, int y, int size, int number, ALLEGRO_FONT* fonte3) {
 	ALLEGRO_COLOR color = al_map_rgb(31, 161, 171); // Cor do losango
 
@@ -67,7 +46,7 @@ void drawLosango(int x, int y, int size, int number, ALLEGRO_FONT* fonte3) {
 	};
 
 
-	// Desenha os triângulos com bordas arredondadas
+	// Desenha os triÃ¢ngulos com bordas arredondadas
 	for (int i = 0; i < 4; ++i) {
 		al_draw_filled_triangle(
 			points[(i * 2) % 8], points[(i * 2 + 1) % 8],
@@ -94,34 +73,32 @@ void drawLosango(int x, int y, int size, int number, ALLEGRO_FONT* fonte3) {
 		);
 	}
 
-	// Ajusta a posição do texto
-	float textWidth = al_get_text_width(fonte3, "99"); // Máximo de dois dígitos
+	// Ajusta a posiÃ§Ã£o do texto
+	float textWidth = al_get_text_width(fonte3, "99"); // MÃ¡ximo de dois dÃ­gitos
 	float textHeight = al_get_font_line_height(fonte3);
 	float textX = x - textWidth / 2; // Ajusta para o centro
 	float textY = y - textHeight / 2; // Ajusta para o centro
 
-	// Desenha o número no centro do losango
+	// Desenha o nÃºmero no centro do losango
 	if (number >= 2 || number <= 3 || number == 7) {
 		al_draw_textf(fonte3, al_map_rgb(255, 255, 255), textX + 12, textY, ALLEGRO_ALIGN_CENTER, "%d", number);
 	}
 	al_draw_textf(fonte3, al_map_rgb(255, 255, 255), textX + 11.5, textY, ALLEGRO_ALIGN_CENTER, "%d", number);
 }
 
-// Função para desenhar a imagem de sombra
+// FunÃ§Ã£o para desenhar a imagem de sombra
 void drawShadow(int x, int y, ALLEGRO_BITMAP* shadow) {
 	al_draw_bitmap(shadow, x, y, 0);
 }
 
-
-
-int main(void) {
-	// Inicialização do Allegro	
+int main(){
+	// InicializaÃ§Ã£o do Allegro	
 	if (!al_init()) {
 		fprintf(stderr, "Falha ao inicializar o Allegro.\n");
 		return -1;
 	}
 
-	// Criação do display
+	// CriaÃ§Ã£o do display
 	ALLEGRO_DISPLAY* display = al_create_display(800, 600);
 	if (!display) {
 		printf("Falha ao criar janela.\n");
@@ -129,7 +106,7 @@ int main(void) {
 
 	}
 
-	// Inicialização dos add-ons necessários
+	// InicializaÃ§Ã£o dos add-ons necessÃ¡rios
 	al_init_font_addon();
 	al_init_ttf_addon();
 	al_init_primitives_addon();
@@ -165,25 +142,25 @@ int main(void) {
 	}
 
 
-	// Criação da fonte
+	// CriaÃ§Ã£o da fonte
 	ALLEGRO_FONT* font = al_create_builtin_font();
 	ALLEGRO_FONT* fonte = al_load_ttf_font("fontes/Exo-SemiBold.ttf", 30, 0);
 	ALLEGRO_FONT* fonte2 = al_load_ttf_font("fontes/Exo-ExtraLight.ttf", 20, 0);
 	ALLEGRO_FONT* fonte3 = al_load_ttf_font("fontes/Exo-SemiBold.ttf", 20, 0);
 
 
-	// Criação da fila de eventos e registro do teclado como fonte de eventos
+	// CriaÃ§Ã£o da fila de eventos e registro do teclado como fonte de eventos
 	ALLEGRO_EVENT_QUEUE* event_queue = al_create_event_queue();
 	al_register_event_source(event_queue, al_get_keyboard_event_source());
+
 
 	// Desenha tela inicial 
 	drawBemvindo(fonte, logo, bemvindo);
 	al_flip_display();
 
-	// Aceita no máx 3 jogadores, podemos mudar
+	// Aceita no mÃ¡x 3 jogadores, podemos mudar
 	Player players[10];
 	int numPlayers = 0;
-
 
 	// Loop para cada jogador
 	while (numPlayers < 10) {
@@ -198,10 +175,12 @@ int main(void) {
 
 			al_flip_display();
 
-			// Lógica para entrada do nome do jogador
+			// LÃ³gica para entrada do nome do jogador
 			if (ev.type == ALLEGRO_EVENT_KEY_CHAR) {
 				if (ev.keyboard.keycode == ALLEGRO_KEY_ENTER) {
 					++numPlayers;
+					gamePlay(display);
+					//placar();
 					break;
 				}
 				else if (pos < 49 && ev.keyboard.unichar >= 32 && ev.keyboard.unichar <= 126) { // verifica tecla para digitar
@@ -213,67 +192,10 @@ int main(void) {
 				else if (ev.keyboard.keycode == ALLEGRO_KEY_BACKSPACE && pos > 0) { // verifica tecla para deletar
 					players[numPlayers].name[--pos] = '\0';
 				}
-
-			}
-
-
-		}
-
-		// Controle de pontuação para cada jogador 
-		players[numPlayers - 1].score = rand() % 100; // pontuação aleatória como exemplo, vamos substituir pela lógica real
-		insertionSort(players, numPlayers);
-
-		// Exibir placar após cada jogador
-		al_draw_bitmap(background, 0, 0, 0); // Desenha a imagem de fundo
-		for (int i = 0; i < numPlayers; ++i) {
-			drawLosango(200, 165 + i * (40 + 10), 40, i + 1, fonte3);
-			al_draw_textf(fonte2, al_map_rgb(255, 255, 255), 360, 155 + i * (40 + 10), ALLEGRO_ALIGN_LEFT, " %s", players[i].name);
-			al_draw_textf(fonte2, al_map_rgb(255, 255, 255), 565, 155 + i * (40 + 10), ALLEGRO_ALIGN_LEFT, " %d pts", players[i].score);
-			drawShadow(255, 190 + i * (40 + 10), shadow);
-		}
-
-		al_flip_display(); // Atualiza o display
-		al_rest(2); // Aguarda 2 segundos para exibir o placar antes de continuar
-
-		// Exibir opções de voltar ou sair após cada jogador
-		displayOptions(fonte2);
-
-		ALLEGRO_KEYBOARD_STATE keyState;
-		while (true) {
-			al_get_keyboard_state(&keyState);
-			if (al_key_down(&keyState, ALLEGRO_KEY_V)) {
-				// Voltar para o início do loop para o próximo jogador
-				break;
-			}
-			else if (al_key_down(&keyState, ALLEGRO_KEY_S)) {
-				// Sair do jogo
-				al_destroy_bitmap(logo);
-				al_destroy_display(display);
-				return 0;
 			}
 		}
+		placar(players, numPlayers, background, shadow, logo, fonte2, fonte3, display);
 	}
-
-	// Ordena o vetor de jogadores em ordem decrescente de pontuação usando Insertion Sort
-	insertionSort(players, numPlayers);
-
-	// Exibir placar final
-	al_draw_bitmap(background, 0, 0, 0); // Desenha a imagem de fundo
-	for (int i = 0; i < numPlayers; ++i) {
-		drawLosango(200, 165 + i * (40 + 10), 40, i + 1, fonte3);
-		al_draw_textf(fonte2, al_map_rgb(255, 255, 255), 360, 155 + i * (40 + 10), ALLEGRO_ALIGN_LEFT, " %s", players[i].name);
-		al_draw_textf(fonte2, al_map_rgb(255, 255, 255), 565, 155 + i * (40 + 10), ALLEGRO_ALIGN_LEFT, " %d pts", players[i].score);
-		drawShadow(255, 190 + i * (40 + 10), shadow);
-	}
-
-	al_flip_display();
-	al_rest(5); // Aguarda 5 segundos para exibir o placar final antes de encerrar
-
-
-
-	al_destroy_bitmap(logo); // Libera a memória alocada para a imagem da logo
-	al_destroy_bitmap(shadow);// Libera a memória alocada para a imagem de sombra
-	al_destroy_display(display); // Destrói o display
 
 	return 0;
 }
