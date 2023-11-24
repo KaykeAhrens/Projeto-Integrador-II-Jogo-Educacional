@@ -1,4 +1,4 @@
-﻿#include <stdio.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <allegro5/allegro.h>
@@ -9,8 +9,91 @@
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_audio.h>
 #include <allegro5/allegro_acodec.h>
-#include "game.h"
 #include <string.h>
+#include "game.h"
+
+
+// Função de ordenação (Insertion Sort) para ordenar o vetor de jogadores em ordem decrescente de pontuação
+void insertionSort(Player arr[], int n) {
+    int i, j;
+    Player key;
+
+    for (i = 1; i < n; i++) {
+        key = arr[i];
+        j = i - 1;
+
+        while (j >= 0 && arr[j].score < key.score) {
+            arr[j + 1] = arr[j];
+            j = j - 1;
+        }
+        arr[j + 1] = key;
+    }
+}
+
+// Função do Placar
+int placar(Player* players, int numPlayers, int pontuacao, ALLEGRO_BITMAP* background, ALLEGRO_BITMAP* shadow, ALLEGRO_BITMAP* logo,
+    ALLEGRO_FONT* fonte2, ALLEGRO_FONT* fonte3, ALLEGRO_DISPLAY* display, const char* nomeJogador) {
+    while (numPlayers < 10) {
+        // Controle de pontuação para cada jogador 
+        players[numPlayers - 1].score = pontuacao;
+        insertionSort(players, numPlayers);
+
+        // Exibir placar após cada jogador
+		al_draw_bitmap(background, 0, 0, 0); // Desenha a imagem de fundo
+        for (int i = 0; i < numPlayers; ++i) {
+            drawLosango(200, 165 + i * (40 + 10), 40, i + 1, fonte3);
+            al_draw_textf(fonte2, al_map_rgb(255, 255, 255), 360, 155 + i * (40 + 10), ALLEGRO_ALIGN_LEFT, " %s", players[i].name);
+            al_draw_textf(fonte2, al_map_rgb(255, 255, 255), 565, 155 + i * (40 + 10), ALLEGRO_ALIGN_LEFT, " %d pts", players[i].score);
+            drawShadow(255, 190 + i * (40 + 10), shadow);
+        }
+
+        al_flip_display(); // Atualiza o display
+        al_rest(2); // Aguarda 2 segundos para exibir o placar antes de continuar
+
+        // Exibir opções de voltar ou sair após cada jogador
+        displayOptions(fonte2);
+
+        ALLEGRO_KEYBOARD_STATE keyState;
+        while (true) {
+            al_get_keyboard_state(&keyState);
+            if (al_key_down(&keyState, ALLEGRO_KEY_V)) {
+                // Voltar para o início do loop para o próximo jogador
+                al_destroy_display(display);
+                inicio();
+                //return;
+            }
+            else if (al_key_down(&keyState, ALLEGRO_KEY_S)) {
+                al_destroy_display(display);
+                al_destroy_bitmap(logo);
+                return -1;
+            }
+        }
+    }
+
+    // Ordena o vetor de jogadores em ordem decrescente de pontuação usando Insertion Sort
+    insertionSort(players, numPlayers);
+
+    // Exibir placar final
+    al_draw_bitmap(background, 0, 0, 0); // Desenha a imagem de fundo
+    for (int i = 0; i < numPlayers; ++i) {
+        drawLosango(200, 165 + i * (40 + 10), 40, i + 1, fonte3);
+        al_draw_textf(fonte2, al_map_rgb(255, 255, 255), 360, 155 + i * (40 + 10), ALLEGRO_ALIGN_LEFT, " %s", players[i].name);
+        al_draw_textf(fonte2, al_map_rgb(255, 255, 255), 565, 155 + i * (40 + 10), ALLEGRO_ALIGN_LEFT, " %d pts", players[i].score);
+        drawShadow(255, 190 + i * (40 + 10), shadow);
+    }
+
+    al_flip_display();
+    al_rest(5); // Aguarda 5 segundos para exibir o placar final antes de encerrar
+
+    al_destroy_bitmap(logo); // Libera a memória alocada para a imagem da logo
+    al_destroy_bitmap(shadow);// Libera a memória alocada para a imagem de sombra
+    al_destroy_display(display); // Destrói o display
+    return 0;
+}
+
+
+
+
 
 int pegarIndexPocao(char* nomeImagem) {
     char* token = NULL;
@@ -21,19 +104,11 @@ int pegarIndexPocao(char* nomeImagem) {
     return indexPotion;
 }
 
-int gamePlay() {
+int gamePlay(ALLEGRO_DISPLAY* display){
     // Inicializa  o do Allegro
     if (!al_init()) {
         printf("Falha ao inicializar o Allegro.\n");
         return -1;
-    }
-
-    // Criação do display
-    ALLEGRO_DISPLAY* display = al_create_display(800, 600);
-    if (!display) {
-        printf("Falha ao criar janela.\n");
-        return -1;
-
     }
 
     al_init_font_addon();
@@ -68,11 +143,43 @@ int gamePlay() {
 
     // Cria uma fonte
     ALLEGRO_FONT* fonte = al_load_ttf_font("fontes/Exo-Regular.ttf", 20, 0);
+    ALLEGRO_FONT* fonte2 = al_load_ttf_font("fontes/Exo-ExtraLight.ttf", 20, 0);
+    ALLEGRO_FONT* fonte3 = al_load_ttf_font("fontes/Exo-SemiBold.ttf", 20, 0);
 
     // Cria as m sicas
     ALLEGRO_SAMPLE* msc_timer = al_load_sample("msc/mscTemporizador.mp3");
     ALLEGRO_SAMPLE* msc_game = al_load_sample("msc/mscJogo.mp3");
     al_reserve_samples(2);
+
+    ////////////////////////////////////////////////////////////////////////////
+    // Carrega a imagem da logo do jogo
+    ALLEGRO_BITMAP* logo = al_load_bitmap("img/logo.png");
+    if (!logo) {
+        fprintf(stderr, "Falha ao carregar a imagem da logo!\n");
+        return -1;
+
+    }
+    // Carrega a imagem de fundo do placar
+    ALLEGRO_BITMAP* bgPlacar = al_load_bitmap("img/fundo_placar.png");
+    if (!bgPlacar) {
+        fprintf(stderr, "Falha ao carregar a imagem de fundo!\n");
+        return -1;
+    }
+    // Carrega e desenha a imagem de fundo da tela BemVindo
+    ALLEGRO_BITMAP* bemvindo = al_load_bitmap("img/fundo_bemvindo.png");
+    if (!bgPlacar) {
+        fprintf(stderr, "Falha ao carregar a imagem de fundo!\n");
+        return -1;
+    }
+
+    // Carrega a imagem de sombra
+    ALLEGRO_BITMAP* shadow = al_load_bitmap("img/sombra.png");
+    if (!shadow) {
+        fprintf(stderr, "Falha ao carregar a imagem de sombra!\n");
+        return -1;
+    }
+    ////////////////////////////////////////////////////////////////////////////
+
 
     // Cria uma fila de eventos para o timer
     ALLEGRO_EVENT_QUEUE* timer_queue = al_create_event_queue();
@@ -381,16 +488,21 @@ int gamePlay() {
         int segundos_restantes = segundos % 60;
         al_draw_textf(fonte, al_map_rgb(255, 255, 255), 710, 42, ALLEGRO_ALIGN_CENTRE, "%02d:%02d", minutos, segundos_restantes);
 
+       
+        Player players[10];
+        int numPlayers = 0;
+        
         if (segundos <= 50) {
             al_stop_sample(msc_game);
             al_play_sample(msc_timer, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, 0);
             al_draw_textf(fonte, al_map_rgb(255, 0, 0), 710, 42, ALLEGRO_ALIGN_CENTRE, "%02d:%02d", minutos, segundos_restantes);
         }
         if (segundos == 40) {
-            al_destroy_display(display);
             al_destroy_sample(msc_game);
             al_destroy_sample(msc_timer);
-            int jogo = main();
+            int pontuacaoFinal = pontuacao;
+
+            int jogo = placar(players, numPlayers, pontuacao, bgPlacar, shadow, logo, fonte2, fonte3, display, players->name);
         }
 
         al_draw_textf(fonte, al_map_rgb(255, 255, 255), 605, 82, ALLEGRO_ALIGN_RIGHT, "Pontos: %d", pontuacao);
