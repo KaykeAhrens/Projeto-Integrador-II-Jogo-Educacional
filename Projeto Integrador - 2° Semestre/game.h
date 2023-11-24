@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <allegro5/allegro.h>
 
 enum TipoPocao {
@@ -8,6 +8,12 @@ enum TipoPocao {
     AL,
     MG,
     H
+};
+
+enum PontodePartida {
+    INICIO,
+    JOGANDO,
+    PLACAR
 };
 
 // Struct para representar uma po  o
@@ -24,4 +30,10 @@ typedef struct {
     ALLEGRO_BITMAP* bitmap;
     enum TipoPocao id;
 } PotionProperties;
+
+// Estrutura para representar um jogador
+typedef struct {
+    char name[50];
+    int score;
+} Player;
 
