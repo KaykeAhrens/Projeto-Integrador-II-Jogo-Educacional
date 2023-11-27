@@ -145,10 +145,16 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="global.c" />
+    <ClCompile Include="inicio.c" />
+    <ClCompile Include="jogo.c" />
     <ClCompile Include="main.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game.h" />
+    <ClInclude Include="global.h" />
+    <ClInclude Include="inicio.h" />
+    <ClInclude Include="jogo.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
