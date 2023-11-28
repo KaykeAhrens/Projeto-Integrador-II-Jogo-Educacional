@@ -1,4 +1,4 @@
-﻿#include <stdio.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <allegro5/allegro.h>
@@ -71,7 +71,7 @@ void placar(Player* player, int numPlayers, ALLEGRO_BITMAP* background, ALLEGRO_
     al_flip_display();
     al_rest(5);
 
-    al_destroy_bitmap(logo);  
+    al_destroy_bitmap(logo);
     al_destroy_bitmap(shadow);
     al_destroy_display(display);
 
@@ -87,7 +87,7 @@ int pegarIndexPocao(char* nomeImagem) {
     return indexPotion;
 }
 
-int gamePlay(ALLEGRO_DISPLAY* display, Player *player, int numPlayers) {
+int gamePlay(ALLEGRO_DISPLAY* display, Player* player, int numPlayers) {
     // Inicializa  o do Allegro
     if (!al_init()) {
         printf("Falha ao inicializar o Allegro.\n");
@@ -326,7 +326,7 @@ int gamePlay(ALLEGRO_DISPLAY* display, Player *player, int numPlayers) {
 
     // Loop principal do jogo
     bool sair = false;
-    //al_play_sample(msc_game, 0.5, 0.0, 1.0, ALLEGRO_PLAYMODE_LOOP, 0);
+    al_play_sample(msc_game, 0.5, 0.0, 1.0, ALLEGRO_PLAYMODE_LOOP, 0);
     while (!sair) {
         float tempoAtual = al_get_time();
         if (tempoAtual - tempoAntigo >= 1) {
@@ -470,12 +470,12 @@ int gamePlay(ALLEGRO_DISPLAY* display, Player *player, int numPlayers) {
         int segundos_restantes = segundos % 60;
         al_draw_textf(fonte, al_map_rgb(255, 255, 255), 710, 42, ALLEGRO_ALIGN_CENTRE, "%02d:%02d", minutos, segundos_restantes);
 
-        if (segundos <= 57) {
+        if (segundos <= 10) {
             al_stop_sample(msc_game);
-            //al_play_sample(msc_timer, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, 0);
+            al_play_sample(msc_timer, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, 0);
             al_draw_textf(fonte, al_map_rgb(255, 0, 0), 710, 42, ALLEGRO_ALIGN_CENTRE, "%02d:%02d", minutos, segundos_restantes);
         }
-        if (segundos == 55) {
+        if (segundos == 0) {
             al_destroy_sample(msc_game);
             al_destroy_sample(msc_timer);
 

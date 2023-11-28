@@ -13,7 +13,7 @@
 #include "global.h"
 
 
-int main(){
+int main() {
 	// Inicialização do Allegro	
 	if (!al_init()) {
 		fprintf(stderr, "Falha ao inicializar o Allegro.\n");

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <allegro5/allegro.h>
 
 enum TipoPocao {
@@ -8,6 +8,12 @@ enum TipoPocao {
     AL,
     MG,
     H
+};
+
+enum PontodePartida {
+    INICIO,
+    JOGANDO,
+    PLACAR
 };
 
 // Struct para representar uma po  o
