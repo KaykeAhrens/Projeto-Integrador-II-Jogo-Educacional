@@ -25,3 +25,9 @@ typedef struct {
     enum TipoPocao id;
 } PotionProperties;
 
+// Estrutura para representar um jogador
+typedef struct {
+    char name[50];
+    int score;
+} Player;
+
