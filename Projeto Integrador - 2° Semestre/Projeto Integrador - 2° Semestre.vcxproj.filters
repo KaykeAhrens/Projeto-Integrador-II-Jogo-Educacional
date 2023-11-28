@@ -21,13 +21,21 @@
     <ClCompile Include="main.c">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
+<<<<<<< HEAD
     <ClCompile Include="jogo.c">
+=======
+    <ClCompile Include="global.c">
+>>>>>>> ae809ad984e58bf2c09f8b8f6ac10cb04507633c
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
     <ClCompile Include="inicio.c">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
+<<<<<<< HEAD
     <ClCompile Include="global.c">
+=======
+    <ClCompile Include="jogo.c">
+>>>>>>> ae809ad984e58bf2c09f8b8f6ac10cb04507633c
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
   </ItemGroup>
@@ -35,14 +43,23 @@
     <ClInclude Include="game.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
+<<<<<<< HEAD
+=======
+    <ClInclude Include="global.h">
+      <Filter>Arquivos de Cabeçalho</Filter>
+    </ClInclude>
+>>>>>>> ae809ad984e58bf2c09f8b8f6ac10cb04507633c
     <ClInclude Include="inicio.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
     <ClInclude Include="jogo.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
+<<<<<<< HEAD
     <ClInclude Include="global.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
+=======
+>>>>>>> ae809ad984e58bf2c09f8b8f6ac10cb04507633c
   </ItemGroup>
 </Project>

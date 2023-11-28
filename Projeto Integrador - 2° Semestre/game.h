@@ -10,12 +10,6 @@ enum TipoPocao {
     H
 };
 
-enum PontodePartida {
-    INICIO,
-    JOGANDO,
-    PLACAR
-};
-
 // Struct para representar uma po  o
 typedef struct {
     ALLEGRO_BITMAP* bitmap; // Imagem da po  o
@@ -36,4 +30,3 @@ typedef struct {
     char name[50];
     int score;
 } Player;
-
