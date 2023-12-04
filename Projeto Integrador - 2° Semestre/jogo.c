@@ -81,7 +81,7 @@ void placar(Player* player, int numPlayers, ALLEGRO_BITMAP* bg,
 }
 
 const char* nomesPedidos[9] = { "NaOH", "Agua", "Sal", "MgOH", "HCl", "Cal", "Ferrugem", "Areia", "Amonia" };
-bool nomeUsado[5] = { false, false, false, false, false };
+bool nomeUsado[9] = { false, false, false, false, false, false, false, false, false };
 int ultimoIndiceEscolhido = -1;
 
 int pegarIndexPocao(char* nomeImagem) {
@@ -395,6 +395,8 @@ int gamePlay(ALLEGRO_DISPLAY* display, Player* player, int numPlayers) {
     bool taArrastando = false;
 
     int pontuacao = 0; // Define a pontuacao inicial
+    bool metadeCompleta[9] = { false, false, false, false, false, false, false, false, false };
+
 
     // Loop principal do jogo
     bool sair = false;
@@ -457,12 +459,14 @@ int gamePlay(ALLEGRO_DISPLAY* display, Player* player, int numPlayers) {
                             {
                                 orders[i].adicionadoElemento1 = true;
                                 pocaoErrada = true;
+                                metadeCompleta[i] = true;
 
                             }
                             else if (orders[i].idElemento2 == tipoPocaoArrastada)
                             {
                                 orders[i].adicionadoElemento2 = true;
                                 pocaoErrada = true;
+                                metadeCompleta[i] = true;
 
                             }
 
@@ -471,6 +475,7 @@ int gamePlay(ALLEGRO_DISPLAY* display, Player* player, int numPlayers) {
                             if (orders[i].adicionadoElemento1 && orders[i].adicionadoElemento2)
                             {
                                 pontuacao += 50;
+                                metadeCompleta[i] = false;
 
                                 // Percorre os pedidos pra que se caso exista um elemento que seja
                                 // igual ao pedido que foi coletado, para reiniciar as suas variaveis.
@@ -486,13 +491,16 @@ int gamePlay(ALLEGRO_DISPLAY* display, Player* player, int numPlayers) {
                                         {
                                             orders[j].adicionadoElemento1 = false;
                                             orders[j].adicionadoElemento2 = false;
+                                            metadeCompleta[j] = false;
                                         }
                                         else if (orders[j].idElemento1 == orders[i].idElemento1) {
                                             orders[j].adicionadoElemento1 = false;
+                                            metadeCompleta[j] = false;
                                         }
 
                                         else if (orders[j].idElemento2 == orders[i].idElemento2) {
                                             orders[j].adicionadoElemento2 = false;
+                                            metadeCompleta[j] = false;
                                         }
                                     }
 
@@ -629,7 +637,7 @@ int gamePlay(ALLEGRO_DISPLAY* display, Player* player, int numPlayers) {
             al_play_sample(msc_timer, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, 0);
             al_draw_textf(fonte, al_map_rgb(255, 0, 0), 710, 42, ALLEGRO_ALIGN_CENTRE, "%02d:%02d", minutos, segundos_restantes);
         }
-        if (segundos == 0) {
+        if (segundos == 50) {
             al_destroy_sample(msc_game);
             al_destroy_sample(msc_timer);
 
