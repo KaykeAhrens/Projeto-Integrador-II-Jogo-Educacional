@@ -2,14 +2,21 @@
 #include <allegro5/allegro.h>
 
 enum TipoPocao {
-    NA,
-    CL,
+    Na,
+    Cl,
     OH,
-    AL,
-    MG,
+    Al,
+    Mg,
     H,
     H2,
-    O
+    H3,
+    O,
+    O2,
+    O3,
+    Ca, 
+    Fe2,
+    N,
+    Si
 };
 
 // Struct para representar uma pocao
