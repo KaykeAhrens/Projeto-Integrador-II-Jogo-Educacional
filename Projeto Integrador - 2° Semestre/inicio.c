@@ -175,7 +175,7 @@ int inicio(Player players) {
 					gamePlay(display, &players, numPlayers);
 					break;
 				}
-				else if (pos < 49 && ev.keyboard.unichar >= 32 && ev.keyboard.unichar <= 126) { // verifica tecla para digitar
+				else if (pos < 18 && ev.keyboard.unichar >= 32 && ev.keyboard.unichar <= 126) { // verifica tecla para digitar
 					players.name[pos] = (char)ev.keyboard.unichar;
 					players.name[pos + 1] = '\0';
 					pos++;

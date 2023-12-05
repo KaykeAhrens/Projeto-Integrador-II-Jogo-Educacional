@@ -31,7 +31,7 @@ void insertionSort(Player arr[], int n) {
 
 Player players[10];
 
-void placar(Player* player, int numPlayers, ALLEGRO_BITMAP* bg,
+void placar(Player* player, int numPlayers, ALLEGRO_BITMAP* bg, ALLEGRO_BITMAP* placarFinal,
     ALLEGRO_BITMAP* shadow, ALLEGRO_BITMAP* logo,
     ALLEGRO_FONT* fonte2, ALLEGRO_FONT* fonte3, ALLEGRO_DISPLAY* display)
 {
@@ -43,7 +43,7 @@ void placar(Player* player, int numPlayers, ALLEGRO_BITMAP* bg,
         al_draw_bitmap(bg, 0, 0, 0); // Desenha a imagem de fundo
         for (int i = 0; i < numPlayers; ++i) {
             drawLosango(200, 165 + i * (40 + 10), 40, i + 1, fonte3);
-            al_draw_textf(fonte2, al_map_rgb(255, 255, 255), 360, 155 + i * (40 + 10), ALLEGRO_ALIGN_LEFT, " %s", players[i].name);
+            al_draw_textf(fonte2, al_map_rgb(255, 255, 255), 250, 155 + i * (40 + 10), ALLEGRO_ALIGN_LEFT, " %s", players[i].name);
             al_draw_textf(fonte2, al_map_rgb(255, 255, 255), 565, 155 + i * (40 + 10), ALLEGRO_ALIGN_LEFT, " %d pts", players[i].score);
             drawShadow(255, 190 + i * (40 + 10), shadow);
         }
@@ -51,7 +51,12 @@ void placar(Player* player, int numPlayers, ALLEGRO_BITMAP* bg,
         al_flip_display(); // Atualiza o display
 
         // Exibir opcoes de voltar ou sair apos cada jogador
-        displayOptions(fonte2);
+        if (numPlayers <= 7) {
+            displayOptions(fonte2);
+            al_draw_bitmap(placarFinal, 350, 100, 0);
+
+        }
+
         al_rest(5);
 
         ALLEGRO_KEYBOARD_STATE keyState;
@@ -80,8 +85,8 @@ void placar(Player* player, int numPlayers, ALLEGRO_BITMAP* bg,
     return;
 }
 
-const char* nomesPedidos[9] = { "NaOH", "Agua", "Sal", "MgOH", "HCl", "Cal", "Ferrugem", "Areia", "Amonia" };
-bool nomeUsado[9] = { false, false, false, false, false, false, false, false, false };
+const char* nomesPedidos[13] = { "NaF", "Agua", "Sal", "MgCl2", "HCl", "Cal", "Ferrugem", "Areia", "Amonia", "Fertilizante", "Cianeto", "Hidroxido", "Nitrito" }; //--
+bool nomeUsado[13] = { false, false, false, false, false, false, false, false, false, false, false, false, false }; //--
 int ultimoIndiceEscolhido = -1;
 
 int pegarIndexPocao(char* nomeImagem) {
@@ -96,7 +101,7 @@ int pegarIndexPocao(char* nomeImagem) {
 const char* gerarNovoTexto(int indicePedido) {
     int indice;
     do {
-        indice = rand() % 9;
+        indice = rand() % 13; //??
     } while (indice == ultimoIndiceEscolhido || indice == indicePedido);
 
     ultimoIndiceEscolhido = indice;
@@ -105,11 +110,11 @@ const char* gerarNovoTexto(int indicePedido) {
 
 void pegarFormulaPedido(int indexPedido, Orders* pedido)
 {
-    switch (indexPedido)
+    switch (indexPedido) //--
     {
-    case 0: // NaOH
+    case 0: // NaF
         pedido->idElemento1 = 0; // Na
-        pedido->idElemento2 = 2; // OH
+        pedido->idElemento2 = 17; // F
         break;
     case 1: // H2O
         pedido->idElemento1 = 6; // H2
@@ -119,9 +124,9 @@ void pegarFormulaPedido(int indexPedido, Orders* pedido)
         pedido->idElemento1 = 0; // Na
         pedido->idElemento2 = 1; // Cl
         break;
-    case 3: // MgOH
+    case 3: // MgCl2
         pedido->idElemento1 = 4; // Mg
-        pedido->idElemento2 = 2; // OH
+        pedido->idElemento2 = 2; // Cl2
         break;
     case 4: // HCl
         pedido->idElemento1 = 5; // H
@@ -142,6 +147,22 @@ void pegarFormulaPedido(int indexPedido, Orders* pedido)
     case 8: // Amônia - NH3
         pedido->idElemento1 = 13; // N
         pedido->idElemento2 = 7; // H3
+        break;
+    case 9: // Amônia - NH3
+        pedido->idElemento1 = 15; // K
+        pedido->idElemento2 = 1; // Cl
+        break;
+    case 10: // Cianeto - CN
+        pedido->idElemento1 = 16; // C
+        pedido->idElemento2 = 13; // N
+        break;
+    case 11: // Hidróxido - OH
+        pedido->idElemento1 = 8; // O
+        pedido->idElemento2 = 5; // H
+        break;
+    case 12: // Nitrito - NO2
+        pedido->idElemento1 = 13; // N
+        pedido->idElemento2 = 9; // O2
         break;
     default:
         printf("Nenhum elemento correspondente");
@@ -205,7 +226,7 @@ int gamePlay(ALLEGRO_DISPLAY* display, Player* player, int numPlayers) {
 
     // Temporizador
     float tempoAntigo = al_get_time();
-    int segundos = 60;
+    int segundos = 90;
     al_start_timer(timer);
 
     int frame = 0; // Variavel para controlar o quadro atual da esteira
@@ -287,6 +308,14 @@ int gamePlay(ALLEGRO_DISPLAY* display, Player* player, int numPlayers) {
         fprintf(stderr, "Falha ao carregar a imagem de fundo!\n");
         return -1;
     }
+
+    // Carrega a imagem do placar final
+    ALLEGRO_BITMAP* placarFinal = al_load_bitmap("img/placarFinal.png");
+    if (!placarFinal) {
+        fprintf(stderr, "Falha ao carregar a imagem de fundo!\n");
+        return -1;
+    }
+
     // Carrega e desenha a imagem de fundo da tela BemVindo
     ALLEGRO_BITMAP* bemvindo = al_load_bitmap("img/fundo_bemvindo.png");
     if (!bgPlacar) {
@@ -307,11 +336,11 @@ int gamePlay(ALLEGRO_DISPLAY* display, Player* player, int numPlayers) {
     srand(time(NULL));
 
     // Carregamento das imagens das pocoes
-    PotionProperties bitmapPotions[15];
-    Potion potions[15];
+    PotionProperties bitmapPotions[18]; //**
+    Potion potions[18]; //**
 
     // Inicializacao das pocoes
-    for (int i = 0; i < 15; i++) {
+    for (int i = 0; i < 18; i++) { //**
         char nomeImg[50];
         snprintf(nomeImg, sizeof(nomeImg), "img/potion%d.png", i + 1);
         bitmapPotions[i].bitmap = al_load_bitmap(nomeImg);
@@ -319,7 +348,7 @@ int gamePlay(ALLEGRO_DISPLAY* display, Player* player, int numPlayers) {
         // Pega o index da pocao em relacao ao seu endereco de imagem
         // Subtrai 1 do resultado pois o array comeca em 0 e atribui ao id do bitmap da pocao
 
-        if (i < 15)
+        if (i < 18) //**
         {
             potions[i].bitmap = bitmapPotions[i].bitmap;
             potions[i].id = bitmapPotions[i].id;
@@ -347,20 +376,20 @@ int gamePlay(ALLEGRO_DISPLAY* display, Player* player, int numPlayers) {
     }
 
     // Carregamento dos Pedidos
-    ALLEGRO_BITMAP* bitmapOrders[9];
-    Orders orders[9];
+    ALLEGRO_BITMAP* bitmapOrders[13]; //--
+    Orders orders[13]; //--
 
-    char* nomesPedidosAleatorios[9];
+    char* nomesPedidosAleatorios[13]; //--
 
     // Inicializando os Pedidos
-    for (int i = 0; i < 9; i++) {
+    for (int i = 0; i < 13; i++) { //--
         char nomeImg[50];
         snprintf(nomeImg, sizeof(nomeImg), "img/pedido1.png");
         bitmapOrders[i] = al_load_bitmap(nomeImg);
         orders[i].propPedidos.bitmap = bitmapOrders[i];
         int indiceNomeAleatorio;
         do {
-            indiceNomeAleatorio = rand() % 9;
+            indiceNomeAleatorio = rand() % 13; //--
         } while (nomeUsado[indiceNomeAleatorio]);
 
         nomeUsado[indiceNomeAleatorio] = true;
@@ -376,7 +405,7 @@ int gamePlay(ALLEGRO_DISPLAY* display, Player* player, int numPlayers) {
             return -1;
         }
 
-        orders[i].propPedidos.x = 300 - i * 70;
+        orders[i].propPedidos.x = 365 - i * 90;
         orders[i].propPedidos.y = 18;
         orders[i].adicionadoElemento1 = false;
         orders[i].adicionadoElemento2 = false;
@@ -385,17 +414,16 @@ int gamePlay(ALLEGRO_DISPLAY* display, Player* player, int numPlayers) {
     memset(nomeUsado, false, sizeof(nomeUsado));
 
     // Mapeamento entre indices de pocoes e tipos correspondentes
-    enum TipoPocao tipoPorIndice[15] = { Na, Cl, OH, Al, Mg, H, H2, H3, O, O2, O3, Ca, Fe2, N, Si };
+    enum TipoPocao tipoPorIndice[18] = { Na, Cl, Cl2, Al, Mg, H, H2, H3, O, O2, O3, Ca, Fe2, N, Si, K, C, F }; //**
 
     // Variaveis para o drag and drop
     bool arrastando = false;  // Indica se uma pocao esta sendo arrastada
     int indice_PocaoArrastada = -1;  // Indice da pocao sendo arrastada
     int deslocamentoX, deslocamentoY;  // Deslocamento do mouse em relacao ao canto superior esquerdo da pocao arrastada
-    int lastPosition = 14; // Indice da ultima pocao que sera instanciada
+    int lastPosition = 17; // Indice da ultima pocao que sera instanciada //**
     bool taArrastando = false;
 
     int pontuacao = 0; // Define a pontuacao inicial
-    bool metadeCompleta[9] = { false, false, false, false, false, false, false, false, false };
 
 
     // Loop principal do jogo
@@ -421,7 +449,7 @@ int gamePlay(ALLEGRO_DISPLAY* display, Player* player, int numPlayers) {
                     int mouseY = event.mouse.y;
 
                     // Verifica se o mouse esta sobre alguma pocao (comecando da ultima para a primeira)
-                    for (int i = 14; i >= 0; i--) {
+                    for (int i = 17; i >= 0; i--) { //**
                         if (mouseX >= potions[i].x && mouseX <= (potions[i].x + al_get_bitmap_width(potions[i].bitmap)) &&
                             mouseY >= potions[i].y && mouseY <= (potions[i].y + al_get_bitmap_height(potions[i].bitmap))) {
                             arrastando = true;
@@ -459,14 +487,12 @@ int gamePlay(ALLEGRO_DISPLAY* display, Player* player, int numPlayers) {
                             {
                                 orders[i].adicionadoElemento1 = true;
                                 pocaoErrada = true;
-                                metadeCompleta[i] = true;
 
                             }
                             else if (orders[i].idElemento2 == tipoPocaoArrastada)
                             {
                                 orders[i].adicionadoElemento2 = true;
                                 pocaoErrada = true;
-                                metadeCompleta[i] = true;
 
                             }
 
@@ -475,7 +501,6 @@ int gamePlay(ALLEGRO_DISPLAY* display, Player* player, int numPlayers) {
                             if (orders[i].adicionadoElemento1 && orders[i].adicionadoElemento2)
                             {
                                 pontuacao += 50;
-                                metadeCompleta[i] = false;
 
                                 // Percorre os pedidos pra que se caso exista um elemento que seja
                                 // igual ao pedido que foi coletado, para reiniciar as suas variaveis.
@@ -491,16 +516,13 @@ int gamePlay(ALLEGRO_DISPLAY* display, Player* player, int numPlayers) {
                                         {
                                             orders[j].adicionadoElemento1 = false;
                                             orders[j].adicionadoElemento2 = false;
-                                            metadeCompleta[j] = false;
                                         }
                                         else if (orders[j].idElemento1 == orders[i].idElemento1) {
                                             orders[j].adicionadoElemento1 = false;
-                                            metadeCompleta[j] = false;
                                         }
 
                                         else if (orders[j].idElemento2 == orders[i].idElemento2) {
                                             orders[j].adicionadoElemento2 = false;
-                                            metadeCompleta[j] = false;
                                         }
                                     }
 
@@ -556,11 +578,11 @@ int gamePlay(ALLEGRO_DISPLAY* display, Player* player, int numPlayers) {
         al_draw_bitmap(esteira[frame], -50, 470, 0);
 
         // Atualiza a posicao das pocoes e desenha elas
-        for (int i = 0; i < 15; i++) {
+        for (int i = 0; i < 18; i++) { //**
             potions[i].x += potions[i].velocidade;
             // Se a pocao sair da tela a direita, reposicione todas em ordem aleatoria
             if (potions[i].x > 530 && !potions[i].taArrastando) {
-                int randomPotion = rand() % 15;
+                int randomPotion = rand() % 18; //**
 
                 // Verifica se a nova pocao e igual a anterior
                 if (randomPotion == lastPotion) {
@@ -573,7 +595,7 @@ int gamePlay(ALLEGRO_DISPLAY* display, Player* player, int numPlayers) {
                 // Se tiver 2 pocoes consecutivas iguais, escolhe outra aleatoria
                 if (consecutivePotion == 2) {
                     do {
-                        randomPotion = rand() % 15;
+                        randomPotion = rand() % 18; //**
                     } while (randomPotion == lastPotion);
                     consecutivePotion = 0;
                 }
@@ -620,8 +642,8 @@ int gamePlay(ALLEGRO_DISPLAY* display, Player* player, int numPlayers) {
             }
 
             al_draw_text(fonteSemiBold, al_map_rgb(0, 0, 0),
-                orders[i].propPedidos.x + al_get_bitmap_width(bitmapOrders[i]) / 2 + 4,
-                orders[i].propPedidos.y + 35, ALLEGRO_ALIGN_CENTER, orders[i].textoPedido);
+                orders[i].propPedidos.x + al_get_bitmap_width(bitmapOrders[i]) / 2,
+                orders[i].propPedidos.y + 25, ALLEGRO_ALIGN_CENTER, orders[i].textoPedido);
         }
 
         // Temporizador
@@ -637,12 +659,12 @@ int gamePlay(ALLEGRO_DISPLAY* display, Player* player, int numPlayers) {
             al_play_sample(msc_timer, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, 0);
             al_draw_textf(fonte, al_map_rgb(255, 0, 0), 710, 42, ALLEGRO_ALIGN_CENTRE, "%02d:%02d", minutos, segundos_restantes);
         }
-        if (segundos == 50) {
+        if (segundos == 0) {
             al_destroy_sample(msc_game);
             al_destroy_sample(msc_timer);
 
             player->score = pontuacao;
-            placar(player, numPlayers, bgPlacar, shadow, logo, fonte2, fonte3, display);
+            placar(player, numPlayers, bgPlacar, placarFinal, shadow, logo, fonte2, fonte3, display);
         }
 
         al_draw_textf(fonte, al_map_rgb(255, 255, 255), 605, 82, ALLEGRO_ALIGN_RIGHT, "Pontos: %d", pontuacao);
@@ -662,12 +684,12 @@ int gamePlay(ALLEGRO_DISPLAY* display, Player* player, int numPlayers) {
     }
 
     // Destruindo recursos
-    for (int i = 0; i < 15; i++) {
+    for (int i = 0; i < 18; i++) { //**
         al_destroy_bitmap(bitmapPotions[i].bitmap);
         potions[i].bitmap = NULL;
     }
 
-    for (int i = 0; i < 9; i++) {
+    for (int i = 0; i < 13; i++) { //--
         al_destroy_bitmap(bitmapOrders[i]);
         orders[i].propPedidos.bitmap = NULL;
     }

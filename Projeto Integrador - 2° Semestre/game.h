@@ -4,7 +4,7 @@
 enum TipoPocao {
     Na,
     Cl,
-    OH,
+    Cl2,
     Al,
     Mg,
     H,
@@ -13,10 +13,13 @@ enum TipoPocao {
     O,
     O2,
     O3,
-    Ca, 
+    Ca,
     Fe2,
     N,
-    Si
+    Si,
+    K,
+    C,
+    F
 };
 
 // Struct para representar uma pocao
