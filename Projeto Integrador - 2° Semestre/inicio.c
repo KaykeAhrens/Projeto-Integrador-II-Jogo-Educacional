@@ -29,7 +29,7 @@ void drawNome(const char* playerName, ALLEGRO_FONT* fonte2) {
 
 // Desenha opções de voltar ou sair
 void displayOptions(ALLEGRO_FONT* fonte2) {
-	al_draw_text(fonte2, al_map_rgb(255, 255, 255), 800 / 2, 510, ALLEGRO_ALIGN_CENTRE, "Pressione V para Voltar ou S para Sair.");
+	al_draw_text(fonte2, al_map_rgb(255, 255, 255), 800 / 2, 510, ALLEGRO_ALIGN_CENTRE, "Pressione V para Voltar ao Inicio");
 	al_flip_display();
 }
 

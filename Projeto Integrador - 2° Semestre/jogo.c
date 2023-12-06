@@ -31,9 +31,9 @@ void insertionSort(Player arr[], int n) {
 
 Player players[10];
 
-void placar(Player* player, int numPlayers, ALLEGRO_BITMAP* bg, ALLEGRO_BITMAP* placarFinal,
-    ALLEGRO_BITMAP* shadow, ALLEGRO_BITMAP* logo,
-    ALLEGRO_FONT* fonte2, ALLEGRO_FONT* fonte3, ALLEGRO_DISPLAY* display)
+void placar(Player* player, int numPlayers, ALLEGRO_BITMAP* bg, ALLEGRO_BITMAP* shadow, ALLEGRO_BITMAP* logo,
+    ALLEGRO_FONT* fonte2, ALLEGRO_FONT* fonte3, ALLEGRO_DISPLAY* display, ALLEGRO_EVENT_QUEUE* eventqueue, 
+    ALLEGRO_EVENT event)
 {
     if (numPlayers < 10)
     {
@@ -49,40 +49,43 @@ void placar(Player* player, int numPlayers, ALLEGRO_BITMAP* bg, ALLEGRO_BITMAP* 
         }
 
         al_flip_display(); // Atualiza o display
+        al_rest(2);
 
         // Exibir opcoes de voltar ou sair apos cada jogador
         if (numPlayers <= 7) {
             displayOptions(fonte2);
-            al_draw_bitmap(placarFinal, 350, 100, 0);
-
+        }
+        else {
+            al_rest(15);
+            al_destroy_display(display);
+            return -1;
         }
 
-        al_rest(5);
+        bool sair = false;
+        bool vPressed = false;
 
         ALLEGRO_KEYBOARD_STATE keyState;
-        while (true) {
+        while (!sair) {
             al_get_keyboard_state(&keyState);
             if (al_key_down(&keyState, ALLEGRO_KEY_V)) {
-                // Voltar para o inicio do loop para o proximo jogador
+                vPressed = true;
+            }
+            else if (vPressed && !al_key_down(&keyState, ALLEGRO_KEY_V)) {
+                // Tecla V foi pressionada e soltada
+                al_destroy_bitmap(logo);
                 al_destroy_display(display);
                 inicio(player);
             }
-            else if (al_key_down(&keyState, ALLEGRO_KEY_S)) {
-                al_destroy_display(display);
-                al_destroy_bitmap(logo);
-                return;
+            else if (al_get_next_event(eventqueue, &event)) {
+                // Verifica se o usuario fechou a janela no X
+                if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
+                    sair = true;
+                    al_destroy_bitmap(logo);
+                    al_destroy_display(display);
+                }
             }
         }
     }
-
-    al_flip_display();
-    al_rest(5);
-
-    al_destroy_bitmap(logo);
-    al_destroy_bitmap(shadow);
-    al_destroy_display(display);
-
-    return;
 }
 
 const char* nomesPedidos[13] = { "NaF", "Agua", "Sal", "MgCl2", "HCl", "Cal", "Ferrugem", "Areia", "Amonia", "Fertilizante", "Cianeto", "Hidroxido", "Nitrito" }; //--
@@ -309,16 +312,9 @@ int gamePlay(ALLEGRO_DISPLAY* display, Player* player, int numPlayers) {
         return -1;
     }
 
-    // Carrega a imagem do placar final
-    ALLEGRO_BITMAP* placarFinal = al_load_bitmap("img/placarFinal.png");
-    if (!placarFinal) {
-        fprintf(stderr, "Falha ao carregar a imagem de fundo!\n");
-        return -1;
-    }
-
     // Carrega e desenha a imagem de fundo da tela BemVindo
     ALLEGRO_BITMAP* bemvindo = al_load_bitmap("img/fundo_bemvindo.png");
-    if (!bgPlacar) {
+    if (!bemvindo) {
         fprintf(stderr, "Falha ao carregar a imagem de fundo!\n");
         return -1;
     }
@@ -664,7 +660,7 @@ int gamePlay(ALLEGRO_DISPLAY* display, Player* player, int numPlayers) {
             al_destroy_sample(msc_timer);
 
             player->score = pontuacao;
-            placar(player, numPlayers, bgPlacar, placarFinal, shadow, logo, fonte2, fonte3, display);
+            placar(player, numPlayers, bgPlacar, shadow, logo, fonte2, fonte3, display, event_queue, event);
         }
 
         al_draw_textf(fonte, al_map_rgb(255, 255, 255), 605, 82, ALLEGRO_ALIGN_RIGHT, "Pontos: %d", pontuacao);
